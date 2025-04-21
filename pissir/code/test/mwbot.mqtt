@@ -1,0 +1,39 @@
+# %%
+url: tcp://localhost:1883
+user: debug
+password: debug
+
+# $$
+iot/mwbot/debug
+iot/mwbot/new_request
+
+# ##
+topic: iot/mwbot/new_request
+qos: 0
+retain: false
+
+{
+    "slot_id": 2,
+    "percentage": 90,
+    "phone_number": "3703235263"
+}
+
+# ##
+topic: iot/mobiles/3703235263/notify
+qos: 0
+retain: false
+
+{
+    "id": "MWBOT",
+    "message": "Your request has been processed."
+}
+
+# ##
+topic: iot/mwbot/ack
+qos: 0
+retain: false
+
+{
+    "slotId": 1,
+    "kw": 55
+}

@@ -1,0 +1,223 @@
+<mxfile host="65bd71144e" scale="1" border="10">
+    <diagram id="PsLG1nvYOHh64BqABNhy" name="Page-1">
+        <mxGraphModel dx="914" dy="783" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="240" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="187" target="203" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="187" value="backend" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="680" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="224" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="188" target="192" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="188" value="sensor" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="360" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="232" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="189" target="196" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="189" value="monitor" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="440" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="259" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="190" target="193" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="260" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="190" target="201" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="265" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="190" target="195" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="270" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="190" target="194" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="272" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="190" target="271" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="190" value="debug" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="520" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="234" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="191" target="199" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="241" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="191" target="204" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="242" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="191" target="205" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="191" value="mwbot" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="760" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="218" value="" style="edgeStyle=entityRelationEdgeStyle;html=1;rounded=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="192" target="209" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="268" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="192" target="212" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="192" value="iot/sensors/%c/status" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="315" y="347.5" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="230" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="193" target="210" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="193" value="iot/sensors/%c/switch" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="315" y="427.5" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="229" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="194" target="210" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="194" value="iot/sensors/%c/check" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="387.5" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="231" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="195" target="211" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="510" y="490"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="195" value="iot/monitor/check" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="467.5" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="267" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="196" target="212" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="196" value="iot/monitor/count" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="507.5" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="236" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="198" target="200" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="198" value="mobile" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="600" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="235" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="199" target="214" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="199" value="iot/mobiles/%c/notify" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="552.5" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="266" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="200" target="212" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="200" value="iot/mobiles/%c/data" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="636.5" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="237" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="201" target="214" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="201" value="iot/mobiles/%c/close" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="592.5" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="239" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="203" target="213" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="203" value="iot/mwbot/new_request" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="710" width="160" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="269" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="204" target="212" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="204" value="iot/mwbot/debug" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="750" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="220" value="" style="edgeStyle=entityRelationEdgeStyle;html=1;rounded=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="205" target="209" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="205" value="iot/mwbot/ack" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="335" y="790" width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="246" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="208" target="210" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="460" y="890" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="247" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="208" target="211" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="460" y="890" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="248" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;endFill=0;" parent="1" source="208" target="213" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="460" y="890" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="249" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="208" target="214" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="460" y="890" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="208" value="LWT" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="800" y="555" width="50" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="264" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="209" target="208" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="209" value="backend" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="680" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="210" value="sensor" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="360" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="211" value="monitor" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="440" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="212" value="debug" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="520" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="213" value="mwbot" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="760" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="214" value="mobile" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="600" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="215" value="&lt;b&gt;PUBLISHER&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="75" y="285" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="216" value="&lt;b&gt;TOPICS&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="355" y="285" width="70" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="217" value="&lt;b&gt;SUBSCRIBERS&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="590" y="285" width="100" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="226" value="" style="edgeStyle=entityRelationEdgeStyle;html=1;rounded=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="192" target="211" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="475" y="340" as="sourcePoint"/>
+                        <mxPoint x="570" y="720" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="254" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="208" target="212" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="460" y="890" as="sourcePoint"/>
+                        <mxPoint x="590" y="720" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="273" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="271" target="213" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="271" value="iot/mwbot/check" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="680" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="276" value="" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;endArrow=none;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endFill=0;" parent="1" source="187" target="277" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="730" as="sourcePoint"/>
+                        <mxPoint x="290" y="840" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="277" value="iot/mobiles/%c/new" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="830" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="278" style="edgeStyle=entityRelationEdgeStyle;shape=connector;rounded=1;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;" parent="1" source="277" target="212" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="460" y="705" as="sourcePoint"/>
+                        <mxPoint x="590" y="800" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -1,0 +1,27 @@
+@port = 9999
+@baseURLv1 = /api/v1
+@URLv1 = http://localhost:{{port}}{{baseURLv1}}
+
+GET {{URLv1}}/waitingTime HTTP/1.1
+
+###
+
+GET {{URLv1}}/slots/firstfreeslot?datetime_start=2025-02-26T13:30&datetime_end=2025-02-26T16:40 HTTP/1.1
+
+###
+
+POST {{URLv1}}/reservations HTTP/1.1
+
+{
+    "email": "pippofranco@gmail.com",
+    "slot_id": 3,
+    "datetime_start": "2025-03-12 13:30",
+    "datetime_end": "2025-03-12 16:30",
+    "percentage": 100,
+    "reservation": false,
+    "phone_number": "1111111111"
+}
+
+###
+
+GET {{URLv1}}/queue/size HTTP/1.1

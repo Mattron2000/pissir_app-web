@@ -1,0 +1,448 @@
+/*palette
+viola: #302D40
+verde scuro: #0F4037
+verde acqua: #2BD9AB
+verde chiaro: #A7F2BA
+nero: #0D0D0D
+*/
+    html, body {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    body {
+        color: #A7F2BA !important;
+        font-family: 'Roboto', sans-serif !important; 
+        background-image: url('../media/sfondo.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        flex: 1;
+    }
+
+    .hidden{
+        display:none;
+    }
+
+    .myButtons,
+    .myButtons:focus{
+        font-family: 'Roboto', sans-serif !important;
+        color:#A7F2BA;
+        background-color: #0D0D0D;
+        border-color: #A7F2BA;
+        border-radius: 30px;
+        box-shadow: none !important; /* Rimuove l'effetto ombra */
+    }
+
+    .myButtons:hover,
+    .myButtons:active{
+        color:#0D0D0D !important;
+        background-color: #A7F2BA!important;
+        border-color: #0D0D0D!important;
+        box-shadow: none !important; /* Rimuove l'effetto ombra */
+    }
+
+    .myButtonsMulta,
+    .myButtonsMulta:focus{
+        font-family: 'Roboto', sans-serif !important;
+        color:rgb(253, 140, 140);
+        background-color: #0D0D0D;
+        border-color: rgb(253, 140, 140) !important;
+        color:rgb(253, 140, 140);
+        border-radius: 30px;
+        box-shadow: none !important; /* Rimuove l'effetto ombra */
+    }
+
+    .myButtonsMulta:hover,
+    .myButtonsMulta:active{
+        color:#0D0D0D !important;
+        background-color: rgb(253, 140, 140) !important;
+        border-color: #0D0D0D!important;
+        box-shadow: none !important; /* Rimuove l'effetto ombra */
+    }
+
+    .myText, th, td{
+        color: #A7F2BA !important;
+        font-family: 'Roboto', sans-serif !important;
+    }
+
+    .navbar{
+      position:fixed;
+      width:100vw;
+      background-color: #0D0D0D !important;
+      z-index: 999!important;
+    }
+
+    .myNavItem:hover{ /*ogni elemento della navbar preso singolarmente*/
+      color: #0F4037 !important;
+    }
+
+    .myNavItem:focus,
+    .myNavItem:active {
+        color: #302D40 !important; /*colore quando qualcosa è cliccato*/
+    }
+   
+
+    .bi.bi-list{    /*icona 3 linee*/
+        margin: 0px !important;;
+    }
+
+    .navbar-toggler{    /*toglie bordo contenitore 3 linee*/
+        border: 0px;
+    }
+
+    .navbar-toggler:focus,
+    .navbar-toggler:active {
+        box-shadow: none !important; /* Rimuove l'effetto ombra */
+    }
+
+    .myLogin{    /*toglie bordo contenitore 3 linee*/
+        border: 0px;
+        display:inline-block;
+    }
+
+    .myLogin:focus,
+    .myLogin:active {
+        box-shadow: none !important; /* Rimuove l'effetto ombra */
+    }
+
+    .noBorder{
+      border-radius: 20px;
+    }
+
+    .noBorder:focus,
+    .noBorder:active{
+        box-shadow: none !important;
+    }
+
+  
+    .main {
+        
+        padding-top:140px!important;
+        text-align: center;
+        flex: 1
+    }
+
+    .main h1 {
+        font-size: 2em;
+    }
+
+    
+    .content, .sidebar {
+        margin-top: 1rem!important;
+       padding: 18px !important;
+    }
+
+    
+    .header-stations{
+        font-family: 'Roboto', sans-serif !important;
+        margin-bottom: 30px!important;
+    }
+    
+    .content {      
+      padding: 20px 0;
+    }
+
+    .content h2{
+      font-size: 1.7em;
+    }
+    
+    .sidebar {
+      background-color: #0D0D0D;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 20px;
+    }
+    
+    /* Footer styles */
+    footer {
+      background-color: #0D0D0D;
+      font-size: small;
+      padding: 15px;
+      text-align: center;     
+    }
+
+    .adminContainer{
+        background-color: #0D0D0D;
+        border-color: none !important;
+        text-align: center;
+        padding-top: 30px ;
+        padding-bottom:20px;
+        flex:1;
+        margin-top: 80px !important;
+    }
+
+    .noMargin{
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .left{
+        text-align: left;
+        border-color: #0D0D0D !important;
+    }
+
+    .blackBackground{
+        background-color: #0D0D0D !important;
+    }
+
+    .list-group-item {
+        height: 40px !important; 
+    }
+
+    .myAdmMenu{
+        font-family: 'Roboto', sans-serif !important;
+        color:#A7F2BA !important;
+        background-color: #0D0D0D !important;
+    }
+
+    .myAdmMenu:hover{
+        color: #0F4037 !important;
+    }
+
+    .myAdmMenu:active, .myAdmMenu:focus{
+        color:#302D40 !important;
+    }
+
+    .result-section{
+        margin-left: 0px !important;
+    }
+
+    .navMenu{
+        margin-top: 0px !important;
+    }
+
+    .table, .table th, .table td {
+        border: none;
+    }
+
+    /*STILE PER MODALI*/
+    /*STILE PER LOGIN*/
+
+    .modal-dialog-centered {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - 1rem);
+    }
+
+    .modal-content {
+        margin: auto;
+        background-color: #0D0D0D!important;
+    }
+
+    .modal-header, .modal-footer {  /*toglie righe bianche*/
+        border: none; 
+        background-color: #0D0D0D!important;
+    }
+
+    .myLink{ /*linkdentro il login*/
+        color:#2bd9ab !important;
+    }
+
+    .myLink:hover {
+        text-decoration: underline !important; /* Mostra la linea orizzontale */
+    }
+
+    .backInput{ /*sfondo dove si inseriscono dati*/
+        background-color: #302D40;
+        border-radius: 30px!important;
+        border-color: #a7f2ba;
+    }
+
+    .backInput:focus,
+    .backInput:active{
+        box-shadow: none !important;
+        border: color #0d0d0d !important;
+    }
+
+    .close{ /*la x in alto a destra*/
+        color: #A7F2BA;
+    }
+
+    .close:hover{
+        color:#A7F2BA;
+        border-color: #0d0d0d;
+    }
+
+    .close:active{
+        border-color: #0d0d0d!important;
+        box-shadow: none !important; /* Rimuove il bordo bianco */
+        outline: none !important; /* Rimuove il contorno */
+    }
+
+    /*dropdown province*/
+    .dropdown-menu{
+        background-color: #0d0d0d!important;
+    }
+    .dropdown-item{
+        color:inherit !important;
+        background-color: #0d0d0d;
+    }
+
+    .dropdown-item:hover{
+      background-color: #A7F2BA!important;
+      color: #0d0d0d!important;
+    }
+
+    .modal-header, .backLog{    /* backLog è per sfondo login e iscrizione */
+        background-color: #0d0d0d;
+    }
+
+    .modal-body{
+      background-color: #0d0d0d !important;
+      
+    }
+
+    /*tendina sotto "prenota"*/
+    .provSel{
+        background-color: #0D0D0D;
+        color:#A7F2BA;
+    }
+
+    option{
+        background-color: #302D40;
+        color:#A7F2BA;
+        border-radius: 30px!important;
+    }
+
+    select::-ms-expand{
+        -webkit-appearance: none!important;
+        -moz-webkit-appearance: none!important;
+        appearance: none!important;       
+    }
+
+    option:hover{
+        background-color: #A7F2BA!important;
+        color: #302d40 !important;
+    }
+
+    .is-invalid {
+        border-color: red!important;
+        background-color: #fdd;
+    }
+
+    .backInput:invalid{
+        border-color: red!important;
+        background-color: #fdd;
+    }
+
+    #paragIDParcheggio{
+        color: rgb(17, 244, 17) !important;
+    }
+
+    .premiumFine{
+        color: red;
+    }
+
+
+    /*schermi medi e grandi*/ 
+    @media(min-width: 768px) {    /*breakpoint "md" come messo in navbar*/
+
+      
+        .myLogin{
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            width:4.5rem;           
+            color: #A7F2BA !important;
+            border-color: #A7F2BA !important;
+            border-radius: 30px;            
+        }
+
+        .myLogin:hover{
+            color: #0d0d0d !important;
+            background-color: #A7F2BA !important;
+            border-color: #0d0d0d !important;
+        }
+
+        .myLogin:active{
+            color: #A7F2BA !important;
+            background-color: #0d0d0d !important;
+            border-color: #A7F2BA !important;
+        }
+
+        .content{
+            padding:0px !important;
+            margin-top: 5em !important;
+        }
+
+
+        .header-stations{
+            display: flex;
+            justify-content: space-around; 
+            align-items: center;
+            margin-bottom: 20px!important;
+        }
+
+        .headerSx{
+            margin:0;
+        }
+
+        .headerCenter{
+            text-align: center;
+            margin: 0 !important;
+            padding: 0!important;
+        }
+
+
+        /* main */
+        .main {
+            background-image: url('../media/sfondo.jpg') no-repeat center center;
+            background-size: cover;
+            padding-top: 150px ;
+            padding-bottom:20px;
+            margin-top: 40px!important;
+        }
+
+        .main h1 {
+            font-size: 3em;
+            margin-bottom: 20px;            
+        }
+
+        .mainTotem {
+            background-image: url('../media/sfondo.jpg') no-repeat center center;
+            background-size: cover;
+            text-align: center;
+            flex: 1;
+            padding-top: 100px ;
+            padding-bottom:10px;
+            margin-top: 40px!important;
+        }
+
+        .mainTotem h1 {
+            font-size: 2.7em;
+            margin-bottom: 20px;            
+        }
+
+        .card-body.text-center{
+            padding-top: 0px !important;
+        }
+
+
+        .ml-sm-auto{
+            margin-left: 0px !important; 
+        }
+
+        
+        #dynamic-content {
+            overflow-x: auto !important;
+            max-width: 100% !important;
+        }
+
+        .navMenu{
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+        }
+
+        footer{
+            margin-top: 7em !important;
+            
+        }
+
+        .card-footer.d-flex.justify-content-between{
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+        }
+    }

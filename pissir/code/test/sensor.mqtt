@@ -1,0 +1,22 @@
+# %%
+url: tcp://localhost:1883
+user: sensor
+password: sensor
+
+# $$
+iot/sensors/+/status
+
+# ##
+topic: iot/sensors/sensor_1/check
+qos: 0
+retain: false
+
+# ##
+topic: iot/sensors/sensor_1/status
+qos: 0
+retain: false
+
+{
+    "slot_id": 1,
+    "status": "OCCUPIED"
+}

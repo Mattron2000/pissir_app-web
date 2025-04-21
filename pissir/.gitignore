@@ -1,0 +1,43 @@
+#
+# GLOBAL IGNORE
+#
+00-*
+
+prova
+
+*.zip
+
+#
+# GRADLE IGNORE
+#
+## By Gradle's gitignore
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Ignore Gradle binary output directory
+bin
+
+#
+# FRONTEND IGNORE
+#
+node_modules
+
+#
+# IOT IGNORE
+#
+sensor_*-tcplocalhost1883/.lck
+sensor_*-tcplocalhost1883/.lck
+monitor-tcplocalhost1883/.lck
+mwbot-tcplocalhost1883/.lck
+mobile_*-tcplocalhost1883/.lck
+
+#
+# TEMP
+#
+temp
+modifiche.txt
+code/backend/backend-tcplocalhost1883/.lck
+code/mwbot/mwbot-tcplocalhost1883/.lck

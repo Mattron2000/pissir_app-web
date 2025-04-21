@@ -1,0 +1,7 @@
+# mi serve inline html per i colori (<p style="color:red"> ecc...)
+MD033: false
+
+# disabilito la validazione della lunghezza della riga perché non ci serve
+line_length: false
+
+MD037: false

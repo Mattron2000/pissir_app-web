@@ -1,0 +1,18 @@
+# https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
+
+[versions]
+gson = "2.11.0"
+paho = "1.2.5"
+javalin = "6.3.0"
+slf4j-simple = "2.0.16"
+jdbc-sqlite = "3.47.1.0"
+
+[libraries]
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+paho = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "paho" }
+javalin = { module = "io.javalin:javalin", version.ref = "javalin" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j-simple" }
+openapi-processor = { module = "io.javalin.community.openapi:openapi-annotation-processor", version.ref = "javalin" }
+openapi-plugin = { module = "io.javalin.community.openapi:javalin-openapi-plugin", version.ref = "javalin" }
+swagger-plugin = { module = "io.javalin.community.openapi:javalin-swagger-plugin", version.ref = "javalin" }
+jdbc-sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "jdbc-sqlite" }

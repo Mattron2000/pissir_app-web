@@ -1,0 +1,45 @@
+user sensor
+topic   readwrite   LWT
+pattern write       iot/sensors/%c/status
+pattern read        iot/sensors/%c/check
+pattern read        iot/sensors/%c/switch
+
+user monitor
+topic   readwrite   LWT
+topic   write       iot/monitor/count
+topic   read        iot/monitor/check
+topic   read        iot/sensors/+/status
+
+user mobile
+topic   readwrite   LWT
+pattern write       iot/mobiles/%c/data
+pattern read        iot/mobiles/%c/notify
+pattern read        iot/mobiles/%c/close
+
+user mwbot
+topic   readwrite   LWT
+topic   write       iot/mobiles/+/notify
+topic   write       iot/mwbot/debug
+topic   write       iot/mwbot/ack
+topic   read        iot/mwbot/check
+topic   read        iot/mwbot/new_request
+
+user backend
+topic   readwrite   LWT
+topic   write       iot/mwbot/new_request
+topic   write       iot/mobiles/+/new
+topic   read        iot/sensors/+/status
+topic   read        iot/mwbot/ack
+
+user debug
+topic   readwrite   LWT
+topic   write       iot/sensors/+/check
+topic   write       iot/sensors/+/switch
+topic   write       iot/monitor/check
+topic   write       iot/mobiles/+/close
+topic   write       iot/mwbot/check
+topic   read        iot/sensors/+/status
+topic   read        iot/monitor/count
+topic   read        iot/mobiles/+/data
+topic   read        iot/mwbot/debug
+topic   read        iot/mobiles/+/new

@@ -1,0 +1,30 @@
+@port = 9999
+@baseURLv1 = /api/v1
+@URLv1 = http://localhost:{{port}}{{baseURLv1}}
+
+# REQUEST BODY IS VALID
+POST {{URLv1}}/register HTTP/1.1
+
+{
+    "email": "lXas2tWbasd123@example.com",
+    "password": "12345678"
+}
+
+###
+
+GET {{URLv1}}/login HTTP/1.1
+
+{
+    "email": "mariorossi@gmail.com",
+    "password": "password123"
+}
+
+###
+
+PUT {{URLv1}}/users/setType HTTP/1.1
+
+{
+    "email": "lXtWb@example.com",
+    "password": "12345678",
+    "type": "PREMIUM"
+}

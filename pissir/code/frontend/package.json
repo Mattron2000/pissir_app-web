@@ -1,0 +1,20 @@
+{
+  "name": "smartparking-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.2.0",
+    "morgan": "^1.10.0",
+    "mqtt": "^5.10.4",
+    "open": "^10.1.0"
+  }
+}

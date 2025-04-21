@@ -1,0 +1,19 @@
+mobileId=2222222222
+
+# %%
+url: tcp://localhost:1883
+user: debug
+password: debug
+
+# $$
+iot/mobiles/{{mobileId}}/data
+
+# ##
+topic: iot/mobiles/{{mobileId}}/notify
+qos: 0
+retain: false
+
+{
+    "id": {{mobileId}},
+    "message": "Hello, World!"
+}

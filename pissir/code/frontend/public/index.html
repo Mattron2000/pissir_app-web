@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- riferimenti -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">   <!--link per login-->
+    <link href="./css/style.css" rel="stylesheet">
+    <script defer src="https://cdn.rawgit.com/visionmedia/page.js/master/page.js"></script>
+
+
+    <!--script bootstrap-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>      
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  
+    <!-- miei script-->
+    <script defer src="./js/templates/myNav.js"></script>
+    <script defer src="./js/templates/homePage.js"></script>
+    <script defer src="./js/templates/loginButton.js"></script>
+    <script defer src="./js/templates/admin.js"></script>
+    <script defer src="./js/api.js"></script>
+    <script defer src="./js/app.js"></script>
+    <script defer src="./js/main.js"></script>
+
+    <title> SmartParking </title>
+    
+  </head>
+    
+
+  <body>
+
+    <!-- Navbar -->
+    <header>
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand myText" href="/home">
+            <img src="./media/logo.jpg" width="60" height="53">
+              SmartParking
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#A7F2BA" class="bi bi-list" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+            </svg>
+          </button>        
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active myText myNavItem" id="ricarica-btn" href="#" data-toggle="modal" data-target="#modalRicarica">Ricarica</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link myText myNavItem" id="prenota-btn">Prenota</a>
+              </li>
+              <li id= "premiumButton" class="nav-item">
+                <a class="nav-link myText myNavItem" href="#" data-toggle="modal" data-target="#premiumModal">Accesso Premium</a>
+              </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item" id="navbar-btn-toolbar" class="btn myText myNavItem myLogin">
+                <button type="button" id="login-btn" class="btn myText myNavItem myLogin" data-toggle="modal" data-target="#loginModal">           
+                  <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-person-add" viewBox="0 0 16 16">
+                      <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4"></path>
+                      <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z"></path>
+                    </svg>
+                  </span>           
+                    Login                   
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- parte dinamica -->
+    <div id="app-container">
+      
+    </div>
+
+    <!-- Main Content -->
+    <div class="container content">
+      <div class="row">
+        <div class="col-lg-8">
+          <h2>Come funziona?</h2>
+          <p>Grazie all'IA integrata ai nostri sistemi, ti basterà parcheggiare la tua auto nella nostra area parcheggio (Via Antonio Gramsci 10, Vercelli): quando sarà il tuo turno, un bot si posizionerà sotto la tua vettura per caricarla!
+              Tutto ciò solamente utilizzando le funzioni di ricarica e prenotazione del nostro sito.
+          </p>
+          <p>Per usufruire dei nostri servizi è necessario creare o accedere al proprio account.</p>          
+        </div>
+        <div class="col-lg-4 sidebar">
+          <h3>Le mie prenotazioni/multe</h3>
+          <p class ="myText" id="dettagliRicarica">In questo box compariranno i dettagli relativi alle tue prenotazioni/multe!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="myText py-3">
+      <div class="container text-center">
+        <p class="mb-0">© 2024 SmartParking. Tutti i diritti riservati.</p>
+        <p class="mb-0">Supporto: 
+        <a href="mailto:supporto@smartparking.com" class="text-light">supporto@smartparking.com</a> | 
+        Tel: <a href="tel:+393703235263" class="text-light">+393703235263</a>
+        </p>
+      </div>
+    </footer>
+
+
+    <!--modale premium-->
+    <div class="modal fade" id="premiumModal" tabindex="-1" aria-labelledby="premiumModalLabel" aria-hidden="true">
+      <div class="modal-dialog myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="premiumModalLabel">Passa a Premium!</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p id="abbonatiParagraph"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id= "abbonatiOBaseBtn" class="btn myText myLogin" data-dismiss="modal"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!--Modale avvio login-->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content backLog">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalLabel">Login</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="login-form" name="login-form" method="post">
+              <input type="hidden" id="login-form-user-type" value="UTENTE">
+              <div class="form-group">
+                <label for="login-form-email">Email</label>
+                <input type="email" class="form-control backInput" id="login-form-email" placeholder="Inserisci la tua email">
+                <div id="usernameError" class="invalid-feedback"></div>
+              </div>
+              <div class="form-group">
+                <label for="login-form-password">Password</label>
+                <input type="password" class="form-control backInput" id="login-form-password"  placeholder="Inserisci la tua password" >
+                <div id="passwordError" class="invalid-feedback"></div>
+              </div>                
+              <a href="#" class="d-block text-center myLink" data-toggle="modal" data-target="#signupModal">Non hai un account? Iscriviti!</a>              
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" id="loginBtn" class="btn myText myLogin">Login</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal di Iscrizione -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content backLog">
+          <div class="modal-header">
+            <h5 class="modal-title" id="signupModalLabel">Iscriviti</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="signup-form" name="signup-form" method="post">
+              <input type="hidden" id="signup-form-user-type" value="UTENTE">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control backInput" id="signup-form-email" placeholder="Inserisci la tua email">
+                <div id="mError" class="invalid-feedback"></div>
+              </div>
+              <div class="form-group">
+                <label for="password">Password (Almeno 8 caratteri)</label>
+                <input type="password" class="form-control backInput" id="signup-form-password" placeholder="Inserisci la tua password" minlength="8">
+                <div id="pError" class="invalid-feedback"></div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" id= "signupBtn" class="btn myText myLogin">Iscriviti</button>
+          </div>
+        </div>
+      </div>
+    </div>  
+
+    <!-- Modale per ricarica -->
+    <div class="modal fade" id="modalRicarica" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Ricarica</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Per ricaricare la tua auto, una volta arrivato/a alla nostra area di sosta, effettua il login dal totem che troverai all'ingresso e procedi con la ricarica.
+          </div>
+          <div class="modal-footer">         
+            <button type="submit" class="btn myText myLogin" id="parcheggia-e-carica-btn" data-dismiss="modal">Ok</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modale per prenotazione-->
+    <div class="modal fade" id="modalPrenotazione" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabelPrenota">Inserisci l'orario in cui desideri arrivare e il tempo di permanenza.</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="prenota-form" name="prenota-form" method="post">
+              <div class="form-group">
+                <label for="dataPren">Data:</label>
+                <input type="text" class="form-control backInput" id="dataPren" placeholder="yyyy-mm-gg" pattern="^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$">
+              </div>
+              <div class="form-group">
+                <label for="tempoArrivo">Ora di Arrivo:</label>
+                <input type="text" class="form-control backInput" id="tempoArrivo" placeholder="hh:mm" pattern="^(?:[01]\d|2[0-3]):[0-5]\d$">
+              </div>
+              <div class="form-group">
+                <label for="tempoPermanenza">Tempo di permanenza in minuti (massimo 720 minuti - 12 ore):</label>
+                <input type="number" class="form-control backInput" id="tempoPermanenza" placeholder="Inserisci il tempo di permanenza" min="1" max="720">
+              </div>
+              <div id="errorMessagePrenota" class="text-danger" style="display: none; font-size: small;">Per favore, inserisci l'ora di arrivo.</div>
+              <div id="errorMessagePrenota2" class="text-danger" style="display: none; font-size: small;">Per favore, inserisci la data.</div>
+              <div id="errorMessagePrenota3" class="text-danger" style="display: none; font-size: small;">La data inserita non può essere precedente a quella odierna</div>
+              <div id="errorMessagePrenota4" class="text-danger" style="display: none; font-size: small;">Se intendi prenotare per oggi, l'orario di arrivo deve essere successivo a quello attuale.</div>
+              <div id="errorMessagePrenota1" class="text-danger" style="display: none; font-size: small;">Per favore, inserisci la durata della tua sosta.</div>
+              <div id="errorMessagePrenota15" class="text-danger" style="display: none; font-size: small;">Per favore, inserisci i dati nel formato indicato.</div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" id="disponibilità-prenota-btn" class="btn myText myLogin">Cerca</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal utente non loggato -->
+    <div class="modal fade" id="notLoggedModal" tabindex="-1" aria-labelledby="notLoggedLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="notLoggedLabel">Avviso</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Devi possedere un account ed aver effettuato il login per usufruire di questa funzione.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myText myLogin" data-dismiss="modal">Chiudi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal utente non premium -->
+    <div class="modal fade" id="notPremiumModal" tabindex="-1" aria-labelledby="notPremiumLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="notPremiumLabel">Avviso</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Devi essere un utente premium per usufruire di questa funzione.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myText myLogin" data-dismiss="modal">Chiudi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal fascia oraria non disponibile per prenotazione -->
+    <div class="modal fade" id="slotNotAvailableModal" tabindex="-1" aria-labelledby="slotNotAvailableLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="slotNotAvailableLabel">Avviso</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            La fascia oraria selezionata non è disponibile. 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myText myLogin" data-dismiss="modal">Chiudi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  
+    <!-- Modale carta per prenotazione-->
+    <div class="modal fade" id="creditCardModal" tabindex="-1" aria-labelledby="creditCardModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="creditCardModalLabel">Inserisci i Dati della Carta di Credito</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <p id="paragIDParcheggio"></p>
+            </div>
+            <form id="creditCardForm">
+              <div class="mb-3">
+                <label for="cardNumber" class="form-label">Numero della Carta</label>
+                <input type="text" class="form-control backInput" id="cardNumber" placeholder="1234 5678 9012 3456" pattern="^\d{4}(?: \d{4}){3}$|^\d{16}$">
+              </div>
+              <div class="mb-3">
+                <label for="expirationDate" class="form-label">Data di Scadenza</label>
+                <input type="text" class="form-control backInput" id="expirationDate" placeholder="mm/yy" pattern="^(0[1-9]|1[0-2])\/\d{2}$">
+              </div>
+              <div class="mb-3">
+                <label for="cvv" class="form-label">CVV</label>
+                <input type="text" class="form-control backInput" id="cvv" placeholder="123" pattern="^\d{3}$">
+              </div> 
+              <div id="errorMessageCreditCard1" class="text-danger" style="display: none;">Per favore, inserisci il numero della tua carta.</div>
+              <div id="errorMessageCreditCard2" class="text-danger" style="display: none;">Per favore, inserisci la data di scadenza.</div>
+              <div id="errorMessageCreditCard3" class="text-danger" style="display: none;">Per favore, inserisci il cvv.</div>
+              <div id="errorMessageCreditCard4" class="text-danger" style="display: none;">Per favore, inserisci i dati nel formato indicato.</div>
+              
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn myText myLogin" id="submitCardButton" href="#" data-toggle="modal" data-target="#OkPrenModal">Conferma</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- modal prenotazione confermata -->
+    <div class="modal fade" id="OkPrenModal" tabindex="-1" aria-labelledby="OkPrenModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="OkPrenModalLabel">Avviso</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p id="dettPrenP"></p> 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myText myLogin" data-dismiss="modal">Ok</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+     <!-- modal prenotazione cancellata con successo -->
+     <div class="modal fade" id="DelPrenModal" tabindex="-1" aria-labelledby="DelPrenModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="DelPrenModalLabel">Avviso</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p id="dettDelPren">Prenotazione cancellata con sucesso.</p> 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myText myLogin" data-dismiss="modal">Ok</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale carta per pagare multa-->
+    <div class="modal fade" id="finePaymentModal" tabindex="-1" aria-labelledby="finePaymentModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="finePaymentModalLabel">Inserisci i Dati della Carta di Credito</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <p id="paragTotPagamento"></p>
+            </div>
+            <form id="finePaymentForm">
+              <div class="mb-3">
+                <label for="cardNumberF" class="form-label">Numero della Carta</label>
+                <input type="text" class="form-control backInput" id="cardNumberF" placeholder="1234 5678 9012 3456" pattern="^\d{4}(?: \d{4}){3}$|^\d{16}$">
+              </div>
+              <div class="mb-3">
+                <label for="expirationDateF" class="form-label">Data di Scadenza</label>
+                <input type="text" class="form-control backInput" id="expirationDateF" placeholder="mm/yy" pattern="^(0[1-9]|1[0-2])\/\d{2}$">
+              </div>
+              <div class="mb-3">
+                <label for="cvvF" class="form-label">CVV</label>
+                <input type="text" class="form-control backInput" id="cvvF" placeholder="123" pattern="^\d{3}$">
+              </div> 
+              <div id="fineErrorMessageCreditCard1" class="text-danger" style="display: none;">Per favore, inserisci il numero della tua carta.</div>
+              <div id="fineErrorMessageCreditCard2" class="text-danger" style="display: none;">Per favore, inserisci la data di scadenza.</div>
+              <div id="fineErrorMessageCreditCard3" class="text-danger" style="display: none;">Per favore, inserisci il cvv.</div>
+              <div id="fineErrorMessageCreditCard4" class="text-danger" style="display: none;">Per favore, inserisci i dati nel formato indicato.</div>
+              
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn myText myLogin" id="finePaymentButton">Paga</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modale Errori -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="errorLabel">Errore</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="errorModalBody">
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myText myLogin" data-dismiss="modal">Chiudi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Area amministratore  -->
+
+    <!-- Modale aggiornamento costo orario -->
+    <div class="modal fade" id="updateHoursModal" tabindex="-1" aria-labelledby="updateHoursModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateHoursModalLabel">Aggiorna costo orario</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="updateHoursForm">
+              <div class="mb-3">
+                <label for="updateHoursInput" class="form-label">Inserire il nuovo costo orario (solo numerico)</label>
+                <input type="text" class="form-control backInput" id="updateHoursInput" placeholder="costo orario">
+                <div id="updateHoursError1" class="invalid-feedback"></div>
+                <div id="updateHoursError2" class="invalid-feedback"></div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myButtons" id="updateHoursBtn">Aggiorna</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale aggiornamento costo kw -->
+    <div class="modal fade" id="updateKwModal" tabindex="-1" aria-labelledby="updateKwModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateKwModalLabel">Aggiorna costo per kw</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="updateKwForm">
+              <div class="mb-3">
+                <label for="updateKwInput" class="form-label">Inserire il nuovo costo per kw (solo numerico)</label>
+                <input type="text" class="form-control backInput" id="updateKwInput" placeholder="costo in kw">
+                <div id="updateKwError1" class="invalid-feedback"></div>
+                <div id="updateKwError2" class="invalid-feedback"></div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn myButtons" id="updateKwBtn">Aggiorna</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- Modale ricerca pagamenti -->
+    <div class="modal fade" id="paymentHistoryModal" tabindex="-1" aria-labelledby="paymentHistoryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered myText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="paymentHistoryModalLabel">Cronologia pagamenti</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row px-3">
+              Se si desidera ricercare per un giorno singolo o per un orario singolo, e non per intervalli di giorni/ fasce orarie, si prega di inserire la stessa data/ora in entrambi i campi.
+            </div>
+            <hr> <!-- separatore-->
+            <!-- Prima riga: date -->
+            <div class="form-group row">
+              <div class="col">
+                <label for="startDate">Data inizio</label>
+                <input type="date" class="form-control backInput" id="startDate" placeholder="yyyy-mm-gg">
+              </div>
+              <div class="col">
+                <label for="endDate">Data fine</label>
+                <input type="date" class="form-control backInput" id="endDate" placeholder="yyyy-mm-gg">
+              </div>
+            </div>
+            
+            <!-- Seconda riga: ore -->
+            <div class="form-group row">
+              <div class="col">
+                <label for="startTime">Ora inizio</label>
+                <input type="time" class="form-control backInput" id="startTime" placeholder="hh:mm">
+              </div>
+              <div class="col">
+                <label for="endTime">Ora fine</label>
+                <input type="time" class="form-control backInput" id="endTime" placeholder="hh:mm">
+              </div>
+            </div>
+            
+            <!-- Terza riga: checkbox solo soste e solo ricariche -->
+            <div class="form-group row">
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="onlyParking">
+                  <label class="form-check-label" for="onlyParking">Cerca soste</label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="onlyCharging">
+                  <label class="form-check-label" for="onlyCharging">Cerca ricariche</label>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quarta riga: checkbox utenti base e premium -->
+            <div class="form-group row">
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="basicUsers">
+                  <label class="form-check-label" for="basicUsers">Utenti base</label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="premiumUsers">
+                  <label class="form-check-label" for="premiumUsers">Utenti premium</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Footer con il bottone di ricerca -->
+          <div class="modal-footer">
+            <button type="button" class="btn myButtons" id="paymentsHistoryBtn">Cerca</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+  </body>
+</html>

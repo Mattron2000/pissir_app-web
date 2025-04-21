@@ -1,0 +1,24 @@
+sensorId=sensor_1
+
+# %%
+url: tcp://localhost:1883
+user: debug
+password: debug
+
+# $$
+iot/monitor/count
+
+# ##
+topic: iot/monitor/check
+qos: 0
+retain: false
+
+# ##
+topic: iot/sensors/{{sensorId}}/status
+qos: 0
+retain: false
+
+{
+    "id": "{{sensorId}}",
+    "status": "OCCUPATO"
+}

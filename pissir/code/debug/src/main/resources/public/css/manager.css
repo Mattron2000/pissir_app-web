@@ -1,0 +1,15 @@
+
+.mwbot-table{
+    height: 100%;
+    width: 100%;
+    min-width: 500px;
+}
+
+.card-mobile{
+    width: auto;
+}
+
+.card-sensor{
+    width: auto;
+}
+

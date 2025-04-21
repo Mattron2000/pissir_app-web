@@ -1,0 +1,819 @@
+openapi: 3.0.3
+info:
+  description: Questa è la pagina di documentazione della Smart Parking API
+  title: SmartParking - OpenAPI 3.0
+  version: 1.0.0
+servers:
+  - url: http://localhost:9999/api/v1
+paths:
+  /admin/history:
+    get:
+      tags:
+        - Admin
+      summary: Get request history
+      description: Get request history in DB
+      responses:
+        '200':
+          description: History list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestData'
+      deprecated: false
+  /admin/history/date:
+    get:
+      tags:
+        - Admin
+      summary: Get request history by date range
+      description: Get request history by date range in DB
+      parameters:
+        - name: date_start
+          in: query
+          description: Start date
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: date
+            example: YYYY-MM-DD
+        - name: date_end
+          in: query
+          description: End date
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: date
+            example: YYYY-MM-DD
+      responses:
+        '200':
+          description: History list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestData'
+        '400':
+          description: Invalid query provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /admin/history/grade/{grade}:
+    get:
+      tags:
+        - Admin
+      summary: Get request history by user grade
+      description: Get request history by grade in DB
+      parameters:
+        - name: grade
+          in: path
+          description: BASE|PREMIUM
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            example: BASE
+      responses:
+        '200':
+          description: History list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestData'
+        '400':
+          description: Invalid grade provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /admin/history/time:
+    get:
+      tags:
+        - Admin
+      summary: Get request history by time range
+      description: Get request history by time range in DB
+      parameters:
+        - name: time_start
+          in: query
+          description: Start time
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            example: HH:MM:SS
+        - name: time_end
+          in: query
+          description: End time
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            example: HH:MM:SS
+      responses:
+        '200':
+          description: History list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestData'
+        '400':
+          description: Invalid query provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /admin/history/type/{type}:
+    get:
+      tags:
+        - Admin
+      summary: Get request history by type
+      description: Get request history by type in DB
+      parameters:
+        - name: type
+          in: path
+          description: PARKING|CHARGING
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+            example: PARKING
+      responses:
+        '200':
+          description: History list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestData'
+        '400':
+          description: Invalid type provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /admin/prices/hours:
+    put:
+      tags:
+        - Admin
+      summary: Set parking price
+      description: Set parking price in DB
+      requestBody:
+        description: Float number
+        content:
+          application/json:
+            schema:
+              type: number
+              format: float
+        required: false
+      responses:
+        '200':
+          description: Price set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Invalid body provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /admin/prices/kw:
+    put:
+      tags:
+        - Admin
+      summary: Set charging price
+      description: Set charging price in DB
+      requestBody:
+        description: Float number
+        content:
+          application/json:
+            schema:
+              type: number
+              format: float
+        required: false
+      responses:
+        '200':
+          description: Price set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Invalid body provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /fines:
+    get:
+      tags:
+        - Fine
+      summary: Get all fines
+      responses:
+        '200':
+          description: Fines retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailDatetimesPaidData'
+      deprecated: false
+    post:
+      tags:
+        - Fine
+      summary: Add fine
+      description: Add fine to DB
+      requestBody:
+        description: json containing email, datetime_start and datetime_end
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailDatetimesData'
+        required: false
+      responses:
+        '200':
+          description: Fine added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Invalid body provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '409':
+          description: Fine already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+    put:
+      tags:
+        - Fine
+      summary: Update fine
+      description: Update fine in DB
+      requestBody:
+        description: json containing email and datetime_start
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailDatetimeStartData'
+        required: false
+      responses:
+        '200':
+          description: Fine updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Invalid body provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '404':
+          description: Fine not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /fines/{email}:
+    get:
+      tags:
+        - Fine
+      summary: Get user fines
+      parameters:
+        - name: email
+          in: path
+          description: User email
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fines retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailDatetimesPaidData'
+      deprecated: false
+  /login:
+    get:
+      tags:
+        - User
+      summary: Check that user exists
+      description: Returns a result of user login
+      parameters:
+        - name: email
+          in: query
+          description: User email
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: User password
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user with this email and password exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEmailTypeData'
+        '400':
+          description: Invalid email or password provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '404':
+          description: No user has this email and password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /payments/{email}:
+    put:
+      tags:
+        - Request
+      summary: Update request data
+      description: ''
+      parameters:
+        - name: email
+          in: path
+          description: User email
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reservation data updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Invalid email or datetime provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /prices:
+    get:
+      tags:
+        - Admin
+      summary: get prices of parking and charging services
+      description: Returns the prices of parking and charging services
+      responses:
+        '200':
+          description: The prices of parking and charging services
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricesData'
+      deprecated: false
+  /queue/size:
+    get:
+      tags:
+        - Queue
+      summary: Get queue size
+      description: Returns the size of the queue of mwbot
+      responses:
+        '200':
+          description: Queue size
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+      deprecated: false
+  /register:
+    post:
+      tags:
+        - User
+      summary: Create a user
+      description: Insert a new user in DB
+      requestBody:
+        description: User object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUserRequest'
+        required: false
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: User creation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /requests/{email}/unpaid:
+    get:
+      tags:
+        - Request
+      summary: Get user unpaid request
+      parameters:
+        - name: email
+          in: path
+          description: User email
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestData'
+        '400':
+          description: Invalid email provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /reservations:
+    post:
+      tags:
+        - Reservation
+      summary: Add user details about reservation or request
+      requestBody:
+        description: User details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewReservationData'
+        required: true
+      responses:
+        '201':
+          description: New reservation/request added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Request body is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+  /reservations/{email}:
+    get:
+      tags:
+        - Reservation
+      summary: get user reservations by email
+      description: Returns the reservations of a user
+      parameters:
+        - name: email
+          in: path
+          description: User email
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of user reservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserReservationData'
+        '400':
+          description: Request body is invalid
+        '404':
+          description: User not found
+      deprecated: false
+  /slots:
+    get:
+      tags:
+        - Slot
+      summary: Get all slots
+      description: Returns all slots
+      responses:
+        '200':
+          description: List of slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SensorData'
+      deprecated: false
+  /slots/firstfreeslot:
+    get:
+      tags:
+        - Slot
+      summary: Get free slot
+      description: Returns the first free slot
+      parameters:
+        - name: datetime_start
+          in: query
+          description: Start datetime
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+        - name: datetime_end
+          in: query
+          description: End datetime
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: First free slot
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+        '400':
+          description: Invalid datetime format
+        '404':
+          description: No free slots
+      deprecated: false
+  /users/{email}/type:
+    put:
+      tags:
+        - User
+      summary: Set user type
+      description: Set user type in DB
+      parameters:
+        - name: email
+          in: path
+          description: User email
+          required: true
+          deprecated: false
+          allowEmptyValue: false
+          schema:
+            type: string
+      requestBody:
+        description: User object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserTypeData'
+        required: false
+      responses:
+        '200':
+          description: User modified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Request body is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+      deprecated: false
+components:
+  schemas:
+    SensorStatus:
+      type: string
+      enum:
+        - FREE
+        - OCCUPIED
+    EmailDatetimeStartData:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        datetime_start:
+          type: string
+    EmailDatetimesData:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        datetime_start:
+          type: string
+        datetime_end:
+          type: string
+    EmailDatetimesPaidData:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        datetime_start:
+          type: string
+        datetime_end:
+          type: string
+        paid:
+          type: boolean
+      required:
+        - paid
+    ErrorMessage:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+    NewReservationData:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        slot_id:
+          type: integer
+          format: int32
+        datetime_start:
+          type: string
+        datetime_end:
+          type: string
+        percentage:
+          type: integer
+          format: int32
+        reservation:
+          type: boolean
+        phone_number:
+          type: string
+      required:
+        - slot_id
+        - reservation
+    NewUserRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    PricesData:
+      type: object
+      additionalProperties: false
+      properties:
+        costo_kw:
+          type: number
+          format: float
+        costo_sosta:
+          type: number
+          format: float
+      required:
+        - costo_kw
+        - costo_sosta
+    RequestData:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        type:
+          type: string
+        datetime_start:
+          type: string
+        datetime_end:
+          type: string
+        kw:
+          type: integer
+          format: int32
+        slot_id:
+          type: integer
+          format: int32
+      required:
+        - slot_id
+    ResponseMessage:
+      type: object
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+    SensorData:
+      type: object
+      additionalProperties: false
+      properties:
+        slot_id:
+          type: integer
+          format: int32
+        status:
+          $ref: '#/components/schemas/SensorStatus'
+    UserReservationData:
+      type: object
+      additionalProperties: false
+      properties:
+        datetime_start:
+          type: string
+        datetime_end:
+          type: string
+        slot_id:
+          type: integer
+          format: int32
+      required:
+        - slot_id
+    UserTypeData:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+    UserEmailTypeData:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+        type:
+          $ref: '#/components/schemas/UserType'
+    UserType:
+      type: string
+      enum:
+        - BASE
+        - PREMIUM
+        - ADMIN
