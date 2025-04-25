@@ -1,0 +1,27 @@
+﻿@page "/counter"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>@title</PageTitle>
+
+@if (OperatingSystem.IsBrowser())
+{
+    <h1>@title</h1>
+
+    <p role="status">Current count: @currentCount</p>
+
+    <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+}
+else
+{
+    <LoadingSpinner Name="@title" IsWasm=true />
+}
+
+@code {
+    private string title { get; } = "Counter";
+    private int currentCount;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

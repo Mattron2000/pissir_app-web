@@ -1,0 +1,12 @@
+<div style="display: flex; flex-direction: column; align-items: center;">
+    <h2>Loading @(Name) @(IsWasm ? "Wasm" : "")...</h2>
+    <div class="spinner-border"></div>
+</div>
+
+@code {
+    [Parameter]
+    public string? Name { get; init; }
+
+    [Parameter]
+    public bool IsWasm { get; init; } = false;
+}
