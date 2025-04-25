@@ -1,4 +1,3 @@
-using Frontend.Pages;
 using Backend.Components;
 
 var builder = WebApplication.CreateBuilder(args);
