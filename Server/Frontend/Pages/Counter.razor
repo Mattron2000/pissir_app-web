@@ -13,7 +13,7 @@
 }
 else
 {
-    <LoadingSpinner Name="@title" IsWasm=true />
+    <LoadingSpinner Name="@(title + " WebAssembly")" />
 }
 
 @code {
@@ -23,5 +23,13 @@ else
     private void IncrementCount()
     {
         currentCount++;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("Counter WASM was downloaded successfully.");
+        }
     }
 }
