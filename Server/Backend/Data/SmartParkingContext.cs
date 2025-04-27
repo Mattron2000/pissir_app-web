@@ -10,6 +10,7 @@ public class SmartParkingContext : DbContext
     public DbSet<SlotStatus> SlotStatuses { get; set; }
 
     public DbSet<Price> Prices { get; set; }
+    public DbSet<Slot> Slots { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -81,6 +82,30 @@ public class SmartParkingContext : DbContext
             p.HasData(
                 new Price { Type = PriceTypeEnum.PARKING, Amount = 5.50 },
                 new Price { Type = PriceTypeEnum.CHARGING, Amount = 7.25 }
+            );
+        });
+
+        modelBuilder.Entity<Slot>(s =>
+        {
+            // Set PK
+            s.HasKey(pk => pk.Id);
+
+            // Set Id as Primary Key with autoincrement
+            s.Property(pk => pk.Id)
+                .ValueGeneratedOnAdd();
+
+            // Set Status as FK to SlotStatus
+            s.HasOne(s => s.SlotStatus)
+                .WithMany(s => s.Slots)
+                .HasForeignKey(fk => fk.Status);
+
+            // Seed data
+            s.HasData(
+                new Slot { Id = 1, Status = SlotStatusEnum.FREE },
+                new Slot { Id = 2, Status = SlotStatusEnum.FREE },
+                new Slot { Id = 3, Status = SlotStatusEnum.FREE },
+                new Slot { Id = 4, Status = SlotStatusEnum.FREE },
+                new Slot { Id = 5, Status = SlotStatusEnum.FREE }
             );
         });
     }
