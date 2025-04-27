@@ -9,6 +9,8 @@ public class SmartParkingContext : DbContext
     public DbSet<UserType> UserTypes { get; set; }
     public DbSet<SlotStatus> SlotStatuses { get; set; }
 
+    public DbSet<Price> Prices { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite("Data Source=SmartParking.db");
@@ -16,6 +18,8 @@ public class SmartParkingContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<PriceType>(e =>
         {
             // Set PK as string
@@ -24,9 +28,8 @@ public class SmartParkingContext : DbContext
 
             // Seed enum data
             e.HasData(
-                Enum.GetValues(typeof(PriceTypeEnum))
-                    .Cast<PriceTypeEnum>()
-                    .Select(e => new PriceType { Name = e })
+                new PriceType { Name = PriceTypeEnum.PARKING },
+                new PriceType { Name = PriceTypeEnum.CHARGING }
             );
         });
 
@@ -38,9 +41,9 @@ public class SmartParkingContext : DbContext
 
             // Seed enum data
             e.HasData(
-                Enum.GetValues(typeof(UserTypeEnum))
-                    .Cast<UserTypeEnum>()
-                    .Select(e => new UserType { Name = e })
+                new UserType { Name = UserTypeEnum.ADMIN },
+                new UserType { Name = UserTypeEnum.BASE },
+                new UserType { Name = UserTypeEnum.PREMIUM }
             );
         });
 
@@ -52,9 +55,32 @@ public class SmartParkingContext : DbContext
 
             // Seed enum data
             e.HasData(
-                Enum.GetValues(typeof(SlotStatusEnum))
-                    .Cast<SlotStatusEnum>()
-                    .Select(e => new SlotStatus { Name = e })
+                new SlotStatus { Name = SlotStatusEnum.FREE },
+                new SlotStatus { Name = SlotStatusEnum.OCCUPIED }
+            );
+        });
+
+        modelBuilder.Entity<Price>(p =>
+        {
+            // Set PK as string
+            p.HasKey(pk => pk.Type);
+            p.Property(pk => pk.Type).HasConversion<string>();
+
+            // Set PK as FK to PriceType
+            p.HasOne(p => p.PriceType)
+                .WithOne(p => p.Price)
+                .HasForeignKey<Price>(fk => fk.Type);
+
+            // Set Amount as double with range -999.99 to 999.99
+            p.Property(p => p.Amount).HasPrecision(5, 2);
+
+            // Ensure that the Amount is greater than 0.0
+            p.ToTable(c => c.HasCheckConstraint("CK_Price_Amount", "Amount > 0.0"));
+
+            // Seed data
+            p.HasData(
+                new Price { Type = PriceTypeEnum.PARKING, Amount = 5.50 },
+                new Price { Type = PriceTypeEnum.CHARGING, Amount = 7.25 }
             );
         });
     }
