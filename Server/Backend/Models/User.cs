@@ -10,4 +10,5 @@ public class User
 
     // Navigation property
     public UserType UserType { get; set; }
+    public List<Fine> Fines { get; set; }
 }

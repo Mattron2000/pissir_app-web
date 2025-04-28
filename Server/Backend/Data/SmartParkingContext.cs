@@ -13,6 +13,8 @@ public class SmartParkingContext : DbContext
     public DbSet<Slot> Slots { get; set; }
     public DbSet<User> Users { get; set; }
 
+    public DbSet<Fine> Fines { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite("Data Source=SmartParking.db");
@@ -22,41 +24,41 @@ public class SmartParkingContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<PriceType>(e =>
+        modelBuilder.Entity<PriceType>(pt =>
         {
             // Set PK as string
-            e.HasKey(p => p.Name);
-            e.Property(p => p.Name).HasConversion<string>();
+            pt.HasKey(p => p.Name);
+            pt.Property(p => p.Name).HasConversion<string>();
 
             // Seed enum data
-            e.HasData(
+            pt.HasData(
                 new PriceType { Name = PriceTypeEnum.PARKING },
                 new PriceType { Name = PriceTypeEnum.CHARGING }
             );
         });
 
-        modelBuilder.Entity<UserType>(e =>
+        modelBuilder.Entity<UserType>(ut =>
         {
             // Set PK as string
-            e.HasKey(p => p.Name);
-            e.Property(p => p.Name).HasConversion<string>();
+            ut.HasKey(p => p.Name);
+            ut.Property(p => p.Name).HasConversion<string>();
 
             // Seed enum data
-            e.HasData(
+            ut.HasData(
                 new UserType { Name = UserTypeEnum.ADMIN },
                 new UserType { Name = UserTypeEnum.BASE },
                 new UserType { Name = UserTypeEnum.PREMIUM }
             );
         });
 
-        modelBuilder.Entity<SlotStatus>(e =>
+        modelBuilder.Entity<SlotStatus>(ss =>
         {
             // Set PK as string
-            e.HasKey(p => p.Name);
-            e.Property(p => p.Name).HasConversion<string>();
+            ss.HasKey(p => p.Name);
+            ss.Property(p => p.Name).HasConversion<string>();
 
             // Seed enum data
-            e.HasData(
+            ss.HasData(
                 new SlotStatus { Name = SlotStatusEnum.FREE },
                 new SlotStatus { Name = SlotStatusEnum.OCCUPIED }
             );
@@ -110,29 +112,29 @@ public class SmartParkingContext : DbContext
             );
         });
 
-        modelBuilder.Entity<User>(e =>
+        modelBuilder.Entity<User>(u =>
         {
             // Set PK
-            e.HasKey(pk => pk.Email);
+            u.HasKey(pk => pk.Email);
 
             // Check constraint Password min length
-            e.ToTable(c => c.HasCheckConstraint("CK_User_Password", "Length(Password) >= 8"));
+            u.ToTable(c => c.HasCheckConstraint("CK_User_Password", "Length(Password) >= 8"));
 
             // Set Unique constraint on Email and Password
-            e.HasIndex(e => new { e.Email, e.Password })
+            u.HasIndex(e => new { e.Email, e.Password })
                 .IsUnique();
 
             // Set FK to UserType
-            e.HasOne(e => e.UserType)
+            u.HasOne(e => e.UserType)
                 .WithMany(e => e.Users)
                 .HasForeignKey(fk => fk.Type);
 
             // Check Name and Surname that are not empty
-            e.ToTable(c => c.HasCheckConstraint("CK_User_Name", "Name <> ''"));
-            e.ToTable(c => c.HasCheckConstraint("CK_User_Surname", "Surname <> ''"));
+            u.ToTable(c => c.HasCheckConstraint("CK_User_Name", "Name <> ''"));
+            u.ToTable(c => c.HasCheckConstraint("CK_User_Surname", "Surname <> ''"));
 
             // Seed Admin data
-            e.HasData(
+            u.HasData(
                 new User {
                     Email = "admin@gmail.com",
                     Password = "adminadmin",
@@ -141,6 +143,31 @@ public class SmartParkingContext : DbContext
                     Surname = "Palmieri"
                 }
             );
+        });
+
+        modelBuilder.Entity<Fine>(f =>
+        {
+            // Set FK to User
+            f.HasOne(f => f.User)
+                .WithMany(u => u.Fines)
+                .HasForeignKey(fk => fk.UserEmail);
+
+            // Set Datetimes as DATETIME type
+            f.Property(f => f.DateTimeStart)
+                .HasColumnType("DATETIME");
+            f.Property(f => f.DateTimeEnd)
+                .HasColumnType("DATETIME");
+
+            // Set PK as composite key (UserEmail + DateTimeStart)
+            f.HasKey(pk => new { pk.UserEmail, pk.DateTimeStart });
+
+            // Check Datetimes
+            f.ToTable(c => c.HasCheckConstraint("CK_Fine_DateTime", "DateTimeStart < DateTimeEnd"));
+
+            // Set Paid as bool type with default value false
+            f.Property(f => f.Paid)
+                .HasColumnType("BOOLEAN")
+                .HasDefaultValue(false);
         });
     }
 }
