@@ -11,6 +11,7 @@ public class SmartParkingContext : DbContext
 
     public DbSet<Price> Prices { get; set; }
     public DbSet<Slot> Slots { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -106,6 +107,39 @@ public class SmartParkingContext : DbContext
                 new Slot { Id = 3, Status = SlotStatusEnum.FREE },
                 new Slot { Id = 4, Status = SlotStatusEnum.FREE },
                 new Slot { Id = 5, Status = SlotStatusEnum.FREE }
+            );
+        });
+
+        modelBuilder.Entity<User>(e =>
+        {
+            // Set PK
+            e.HasKey(pk => pk.Email);
+
+            // Check constraint Password min length
+            e.ToTable(c => c.HasCheckConstraint("CK_User_Password", "Length(Password) >= 8"));
+
+            // Set Unique constraint on Email and Password
+            e.HasIndex(e => new { e.Email, e.Password })
+                .IsUnique();
+
+            // Set FK to UserType
+            e.HasOne(e => e.UserType)
+                .WithMany(e => e.Users)
+                .HasForeignKey(fk => fk.Type);
+
+            // Check Name and Surname that are not empty
+            e.ToTable(c => c.HasCheckConstraint("CK_User_Name", "Name <> ''"));
+            e.ToTable(c => c.HasCheckConstraint("CK_User_Surname", "Surname <> ''"));
+
+            // Seed Admin data
+            e.HasData(
+                new User {
+                    Email = "admin@gmail.com",
+                    Password = "adminadmin",
+                    Type = UserTypeEnum.ADMIN,
+                    Name = "Matteo",
+                    Surname = "Palmieri"
+                }
             );
         });
     }
