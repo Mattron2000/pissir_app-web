@@ -12,4 +12,5 @@ public class User
     public UserType UserType { get; set; }
     public List<Fine> Fines { get; set; }
     public List<Reservation> Reservations { get; set; }
+    public List<Request> Requests { get; set; }
 }

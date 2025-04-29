@@ -15,6 +15,7 @@ public class SmartParkingContext : DbContext
 
     public DbSet<Fine> Fines { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<Request> Requests { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -190,6 +191,35 @@ public class SmartParkingContext : DbContext
                 .HasColumnType("DATETIME");
             r.Property(r => r.DateTimeEnd)
                 .HasColumnType("DATETIME");
+
+            // Check Datetimes
+            r.ToTable(c => c.HasCheckConstraint("CK_Reservation_DateTime", "DateTimeStart < DateTimeEnd"));
+        });
+
+        modelBuilder.Entity<Request>(r =>
+        {
+            // Set PK as composite key (UserEmail + DateTimeStart)
+            r.HasKey(pk => new { pk.UserEmail, pk.DateTimeStart });
+
+            // Set FK to User
+            r.HasOne(r => r.User)
+                .WithMany(u => u.Requests)
+                .HasForeignKey(fk => fk.UserEmail);
+            // Set FK to Slot
+            r.HasOne(r => r.Slot)
+                .WithMany(s => s.Requests)
+                .HasForeignKey(fk => fk.SlotId);
+
+            // Set Datetimes as DATETIME type
+            r.Property(r => r.DateTimeStart)
+                .HasColumnType("DATETIME");
+            r.Property(r => r.DateTimeEnd)
+                .HasColumnType("DATETIME");
+
+            // Set Paid as bool type with default value false
+            r.Property(r => r.Paid)
+                .HasColumnType("BOOLEAN")
+                .HasDefaultValue(false);
 
             // Check Datetimes
             r.ToTable(c => c.HasCheckConstraint("CK_Reservation_DateTime", "DateTimeStart < DateTimeEnd"));
