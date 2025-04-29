@@ -7,4 +7,5 @@ public class Slot
 
     // Navigation properties
     public SlotStatus SlotStatus { get; set; }
+    public List<Reservation> Reservations { get; set; }
 }

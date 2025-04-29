@@ -14,6 +14,7 @@ public class SmartParkingContext : DbContext
     public DbSet<User> Users { get; set; }
 
     public DbSet<Fine> Fines { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -168,6 +169,30 @@ public class SmartParkingContext : DbContext
             f.Property(f => f.Paid)
                 .HasColumnType("BOOLEAN")
                 .HasDefaultValue(false);
+        });
+
+        modelBuilder.Entity<Reservation>(r =>
+        {
+            // Set PK as composite key (UserEmail + DateTimeStart)
+            r.HasKey(pk => new { pk.UserEmail, pk.DateTimeStart });
+
+            // Set FK to User
+            r.HasOne(r => r.User)
+                .WithMany(u => u.Reservations)
+                .HasForeignKey(fk => fk.UserEmail);
+            // Set FK to Slot
+            r.HasOne(r => r.Slot)
+                .WithMany(s => s.Reservations)
+                .HasForeignKey(fk => fk.SlotId);
+
+            // Set Datetimes as DATETIME type
+            r.Property(r => r.DateTimeStart)
+                .HasColumnType("DATETIME");
+            r.Property(r => r.DateTimeEnd)
+                .HasColumnType("DATETIME");
+
+            // Check Datetimes
+            r.ToTable(c => c.HasCheckConstraint("CK_Reservation_DateTime", "DateTimeStart < DateTimeEnd"));
         });
     }
 }
