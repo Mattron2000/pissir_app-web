@@ -1,13 +1,16 @@
-namespace Backend.Models;
+﻿namespace Backend.Models;
 
-public class Reservation
+public partial class Reservation
 {
-    public string UserEmail { get; set; }
-    public int SlotId { get; set; }
-    public DateTime DateTimeStart { get; set; }
-    public DateTime DateTimeEnd { get; set; }
+    public string Email { get; set; } = null!;
 
-    // Navigation properties
-    public User User { get; set; }
-    public Slot Slot { get; set; }
+    public DateTime DatetimeStart { get; set; }
+
+    public DateTime DatetimeEnd { get; set; }
+
+    public int SlotId { get; set; }
+
+    public virtual User EmailNavigation { get; set; } = null!;
+
+    public virtual Slot Slot { get; set; } = null!;
 }

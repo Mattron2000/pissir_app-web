@@ -1,0 +1,132 @@
+-- BACKEND DATABASE
+
+DROP TABLE IF EXISTS "users_type";
+DROP TABLE IF EXISTS "users";
+DROP TABLE IF EXISTS "slots_status";
+DROP TABLE IF EXISTS "slots";
+DROP TABLE IF EXISTS "requests";
+DROP TABLE IF EXISTS "reservations";
+DROP TABLE IF EXISTS "prices_type";
+DROP TABLE IF EXISTS "prices";
+DROP TABLE IF EXISTS "fines";
+DROP TABLE IF EXISTS "__EFMigrationsHistory";
+DROP TABLE IF EXISTS "__EFMigrationsLock";
+
+-----------
+-- USERS --
+-----------
+
+CREATE TABLE users_type (
+    name TEXT PRIMARY KEY
+);
+
+INSERT INTO users_type
+VALUES ('ADMIN'), ('BASE'), ('PREMIUM');
+
+CREATE TABLE users (
+    email TEXT PRIMARY KEY,
+    password TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'BASE',
+    name TEXT NOT NULL,
+    surname TEXT NOT NULL,
+    UNIQUE (email, password),
+    FOREIGN KEY (type) REFERENCES users_type (name),
+    CHECK (email LIKE '%_@%_.%_'),
+    CHECK (LENGTH(password) >= 8),
+    CHECK (LENGTH(name) > 0),
+    CHECK (LENGTH(surname) > 0)
+);
+
+INSERT INTO users
+VALUES
+    ('admin@gmail.com', 'adminadmin', 'ADMIN', 'Matteo', 'Palmieri');
+
+----------------
+-- POSTI AUTO --
+----------------
+
+CREATE TABLE slots_status (
+    status TEXT PRIMARY KEY
+);
+
+INSERT INTO slots_status
+VALUES ('FREE'), ('OCCUPIED');
+
+CREATE TABLE slots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    status TEXT NOT NULL,
+    FOREIGN KEY (status) REFERENCES slots_status (status)
+);
+
+-- Il parcheggio da 5 slot
+INSERT INTO slots (status)
+VALUES
+    ('FREE'),
+    ('FREE'),
+    ('FREE'),
+    ('FREE'),
+    ('FREE');
+
+---------------
+-- RICHIESTE --
+---------------
+
+CREATE TABLE requests (
+    email TEXT NOT NULL,
+    datetime_start DATETIME NOT NULL,
+    datetime_end DATETIME NOT NULL,
+    kw INTEGER DEFAULT NULL,
+    paid BOOLEAN DEFAULT FALSE,
+    slot_id INTEGER NOT NULL,
+    PRIMARY KEY (email, datetime_start),
+    FOREIGN KEY (email) REFERENCES users (email),
+    FOREIGN KEY (slot_id) REFERENCES slots (id),
+    CHECK (kw IS NULL OR (kw > 0 AND kw <= 100)),
+    CHECK (datetime_start < datetime_end)
+);
+
+------------------
+-- PRENOTAZIONI --
+------------------
+
+CREATE TABLE reservations (
+    email TEXT NOT NULL,
+    datetime_start DATETIME NOT NULL,
+    datetime_end DATETIME NOT NULL,
+    slot_id INTEGER NOT NULL,
+    PRIMARY KEY (email, datetime_start),
+    FOREIGN KEY (email) REFERENCES users (email),
+    FOREIGN KEY (slot_id) REFERENCES slots (id),
+    CHECK (datetime_start < datetime_end)
+);
+
+CREATE TABLE prices_type (
+    name TEXT PRIMARY KEY
+);
+
+INSERT INTO prices_type
+VALUES ('PARKING'), ('CHARGING');
+
+CREATE TABLE prices (
+    type TEXT PRIMARY KEY,
+    amount DECIMAL(5,2) NOT NULL,
+    FOREIGN KEY (type) REFERENCES prices_type (name),
+    CHECK (amount > 0.0)
+);
+
+INSERT INTO prices
+VALUES ('PARKING', 5.50), ('CHARGING', 9.50);
+
+-----------
+-- MULTE --
+-----------
+
+CREATE TABLE fines (
+    email TEXT NOT NULL,
+    datetime_start DATETIME NOT NULL,
+    datetime_end DATETIME NOT NULL,
+    paid BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (email) REFERENCES users (email),
+    PRIMARY KEY (email, datetime_start),
+    CHECK (datetime_start < datetime_end)
+);

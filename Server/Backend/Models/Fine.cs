@@ -1,12 +1,14 @@
-namespace Backend.Models;
+﻿namespace Backend.Models;
 
-public class Fine
+public partial class Fine
 {
-    public string UserEmail { get; set; }
-    public DateTime DateTimeStart { get; set; }
-    public DateTime DateTimeEnd { get; set; }
-    public bool Paid { get; set; } = false;
+    public string Email { get; set; } = null!;
 
-    // Navigation property
-    public User User { get; set; }
+    public DateTime DatetimeStart { get; set; }
+
+    public DateTime DatetimeEnd { get; set; }
+
+    public bool? Paid { get; set; }
+
+    public virtual User EmailNavigation { get; set; } = null!;
 }

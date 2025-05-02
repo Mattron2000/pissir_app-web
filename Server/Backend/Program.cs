@@ -1,4 +1,6 @@
 using Backend.Components;
+using Backend.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddDbContext<SmartParkingContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("SmartParking"))
+);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer()

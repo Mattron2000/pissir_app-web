@@ -1,16 +1,22 @@
-namespace Backend.Models;
+﻿namespace Backend.Models;
 
-public class User
+public partial class User
 {
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public UserTypeEnum Type { get; set; }
-    public string Name { get; set; }
-    public string Surname { get; set; }
+    public string Email { get; set; } = null!;
 
-    // Navigation property
-    public UserType UserType { get; set; }
-    public List<Fine> Fines { get; set; }
-    public List<Reservation> Reservations { get; set; }
-    public List<Request> Requests { get; set; }
+    public string Password { get; set; } = null!;
+
+    public string Type { get; set; } = null!;
+
+    public string Name { get; set; } = null!;
+
+    public string Surname { get; set; } = null!;
+
+    public virtual ICollection<Fine> Fines { get; set; } = new List<Fine>();
+
+    public virtual ICollection<Request> Requests { get; set; } = new List<Request>();
+
+    public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+
+    public virtual UsersType TypeNavigation { get; set; } = null!;
 }

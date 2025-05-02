@@ -1,20 +1,10 @@
-namespace Backend.Models;
+﻿namespace Backend.Models;
 
-public class Price
+public partial class Price
 {
-    public PriceTypeEnum Type { get; set; }
+    public string Type { get; set; } = null!;
 
-    private double _amount;
-    public double Amount
-    {
-        get => _amount;
-        set
-        {
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-            _amount = value;
-        }
-    }
+    public decimal Amount { get; set; }
 
-    // Navigation property
-    public PriceType PriceType { get; set; }
+    public virtual PricesType TypeNavigation { get; set; } = null!;
 }

@@ -1,12 +1,14 @@
-namespace Backend.Models;
+﻿namespace Backend.Models;
 
-public class Slot
+public partial class Slot
 {
     public int Id { get; set; }
-    public SlotStatusEnum Status { get; set; }
 
-    // Navigation properties
-    public SlotStatus SlotStatus { get; set; }
-    public List<Reservation> Reservations { get; set; }
-    public List<Request> Requests { get; set; }
+    public string Status { get; set; } = null!;
+
+    public virtual ICollection<Request> Requests { get; set; } = new List<Request>();
+
+    public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+
+    public virtual SlotsStatus StatusNavigation { get; set; } = null!;
 }

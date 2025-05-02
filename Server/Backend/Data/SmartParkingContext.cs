@@ -1,228 +1,198 @@
-using Backend.Models;
+﻿using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Data;
 
-public class SmartParkingContext : DbContext
+public partial class SmartParkingContext : DbContext
 {
-    public DbSet<PriceType> PriceTypes { get; set; }
-    public DbSet<UserType> UserTypes { get; set; }
-    public DbSet<SlotStatus> SlotStatuses { get; set; }
+    public SmartParkingContext()
+    {
+    }
 
-    public DbSet<Price> Prices { get; set; }
-    public DbSet<Slot> Slots { get; set; }
-    public DbSet<User> Users { get; set; }
+    public SmartParkingContext(DbContextOptions<SmartParkingContext> options)
+        : base(options)
+    {
+    }
 
-    public DbSet<Fine> Fines { get; set; }
-    public DbSet<Reservation> Reservations { get; set; }
-    public DbSet<Request> Requests { get; set; }
+    public virtual DbSet<Fine> Fines { get; set; }
+
+    public virtual DbSet<Price> Prices { get; set; }
+
+    public virtual DbSet<PricesType> PricesTypes { get; set; }
+
+    public virtual DbSet<Request> Requests { get; set; }
+
+    public virtual DbSet<Reservation> Reservations { get; set; }
+
+    public virtual DbSet<Slot> Slots { get; set; }
+
+    public virtual DbSet<SlotsStatus> SlotsStatuses { get; set; }
+
+    public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UsersType> UsersTypes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlite("Data Source=SmartParking.db");
-    }
+        => optionsBuilder.UseSqlite("Name=SmartParking");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<PriceType>(pt =>
+        modelBuilder.Entity<Fine>(entity =>
         {
-            // Set PK as string
-            pt.HasKey(p => p.Name);
-            pt.Property(p => p.Name).HasConversion<string>();
+            entity.HasKey(e => new { e.Email, e.DatetimeStart });
 
-            // Seed enum data
-            pt.HasData(
-                new PriceType { Name = PriceTypeEnum.PARKING },
-                new PriceType { Name = PriceTypeEnum.CHARGING }
-            );
-        });
+            entity.ToTable("fines");
 
-        modelBuilder.Entity<UserType>(ut =>
-        {
-            // Set PK as string
-            ut.HasKey(p => p.Name);
-            ut.Property(p => p.Name).HasConversion<string>();
-
-            // Seed enum data
-            ut.HasData(
-                new UserType { Name = UserTypeEnum.ADMIN },
-                new UserType { Name = UserTypeEnum.BASE },
-                new UserType { Name = UserTypeEnum.PREMIUM }
-            );
-        });
-
-        modelBuilder.Entity<SlotStatus>(ss =>
-        {
-            // Set PK as string
-            ss.HasKey(p => p.Name);
-            ss.Property(p => p.Name).HasConversion<string>();
-
-            // Seed enum data
-            ss.HasData(
-                new SlotStatus { Name = SlotStatusEnum.FREE },
-                new SlotStatus { Name = SlotStatusEnum.OCCUPIED }
-            );
-        });
-
-        modelBuilder.Entity<Price>(p =>
-        {
-            // Set PK as string
-            p.HasKey(pk => pk.Type);
-            p.Property(pk => pk.Type).HasConversion<string>();
-
-            // Set PK as FK to PriceType
-            p.HasOne(p => p.PriceType)
-                .WithOne(p => p.Price)
-                .HasForeignKey<Price>(fk => fk.Type);
-
-            // Set Amount as double with range -999.99 to 999.99
-            p.Property(p => p.Amount).HasPrecision(5, 2);
-
-            // Ensure that the Amount is greater than 0.0
-            p.ToTable(c => c.HasCheckConstraint("CK_Price_Amount", "Amount > 0.0"));
-
-            // Seed data
-            p.HasData(
-                new Price { Type = PriceTypeEnum.PARKING, Amount = 5.50 },
-                new Price { Type = PriceTypeEnum.CHARGING, Amount = 7.25 }
-            );
-        });
-
-        modelBuilder.Entity<Slot>(s =>
-        {
-            // Set PK
-            s.HasKey(pk => pk.Id);
-
-            // Set Id as Primary Key with autoincrement
-            s.Property(pk => pk.Id)
-                .ValueGeneratedOnAdd();
-
-            // Set Status as FK to SlotStatus
-            s.HasOne(s => s.SlotStatus)
-                .WithMany(s => s.Slots)
-                .HasForeignKey(fk => fk.Status);
-
-            // Seed data
-            s.HasData(
-                new Slot { Id = 1, Status = SlotStatusEnum.FREE },
-                new Slot { Id = 2, Status = SlotStatusEnum.FREE },
-                new Slot { Id = 3, Status = SlotStatusEnum.FREE },
-                new Slot { Id = 4, Status = SlotStatusEnum.FREE },
-                new Slot { Id = 5, Status = SlotStatusEnum.FREE }
-            );
-        });
-
-        modelBuilder.Entity<User>(u =>
-        {
-            // Set PK
-            u.HasKey(pk => pk.Email);
-
-            // Check constraint Password min length
-            u.ToTable(c => c.HasCheckConstraint("CK_User_Password", "Length(Password) >= 8"));
-
-            // Set Unique constraint on Email and Password
-            u.HasIndex(e => new { e.Email, e.Password })
-                .IsUnique();
-
-            // Set FK to UserType
-            u.HasOne(e => e.UserType)
-                .WithMany(e => e.Users)
-                .HasForeignKey(fk => fk.Type);
-
-            // Check Name and Surname that are not empty
-            u.ToTable(c => c.HasCheckConstraint("CK_User_Name", "Name <> ''"));
-            u.ToTable(c => c.HasCheckConstraint("CK_User_Surname", "Surname <> ''"));
-
-            // Seed Admin data
-            u.HasData(
-                new User {
-                    Email = "admin@gmail.com",
-                    Password = "adminadmin",
-                    Type = UserTypeEnum.ADMIN,
-                    Name = "Matteo",
-                    Surname = "Palmieri"
-                }
-            );
-        });
-
-        modelBuilder.Entity<Fine>(f =>
-        {
-            // Set FK to User
-            f.HasOne(f => f.User)
-                .WithMany(u => u.Fines)
-                .HasForeignKey(fk => fk.UserEmail);
-
-            // Set Datetimes as DATETIME type
-            f.Property(f => f.DateTimeStart)
-                .HasColumnType("DATETIME");
-            f.Property(f => f.DateTimeEnd)
-                .HasColumnType("DATETIME");
-
-            // Set PK as composite key (UserEmail + DateTimeStart)
-            f.HasKey(pk => new { pk.UserEmail, pk.DateTimeStart });
-
-            // Check Datetimes
-            f.ToTable(c => c.HasCheckConstraint("CK_Fine_DateTime", "DateTimeStart < DateTimeEnd"));
-
-            // Set Paid as bool type with default value false
-            f.Property(f => f.Paid)
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.DatetimeStart)
+                .HasColumnType("DATETIME")
+                .HasColumnName("datetime_start");
+            entity.Property(e => e.DatetimeEnd)
+                .HasColumnType("DATETIME")
+                .HasColumnName("datetime_end");
+            entity.Property(e => e.Paid)
+                .HasDefaultValueSql("FALSE")
                 .HasColumnType("BOOLEAN")
-                .HasDefaultValue(false);
+                .HasColumnName("paid");
+
+            entity.HasOne(d => d.EmailNavigation).WithMany(p => p.Fines)
+                .HasForeignKey(d => d.Email)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
-        modelBuilder.Entity<Reservation>(r =>
+        modelBuilder.Entity<Price>(entity =>
         {
-            // Set PK as composite key (UserEmail + DateTimeStart)
-            r.HasKey(pk => new { pk.UserEmail, pk.DateTimeStart });
+            entity.HasKey(e => e.Type);
 
-            // Set FK to User
-            r.HasOne(r => r.User)
-                .WithMany(u => u.Reservations)
-                .HasForeignKey(fk => fk.UserEmail);
-            // Set FK to Slot
-            r.HasOne(r => r.Slot)
-                .WithMany(s => s.Reservations)
-                .HasForeignKey(fk => fk.SlotId);
+            entity.ToTable("prices");
 
-            // Set Datetimes as DATETIME type
-            r.Property(r => r.DateTimeStart)
-                .HasColumnType("DATETIME");
-            r.Property(r => r.DateTimeEnd)
-                .HasColumnType("DATETIME");
+            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.Amount)
+                .HasColumnType("DECIMAL(5,2)")
+                .HasColumnName("amount");
 
-            // Check Datetimes
-            r.ToTable(c => c.HasCheckConstraint("CK_Reservation_DateTime", "DateTimeStart < DateTimeEnd"));
+            entity.HasOne(d => d.TypeNavigation).WithOne(p => p.Price)
+                .HasForeignKey<Price>(d => d.Type)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
-        modelBuilder.Entity<Request>(r =>
+        modelBuilder.Entity<PricesType>(entity =>
         {
-            // Set PK as composite key (UserEmail + DateTimeStart)
-            r.HasKey(pk => new { pk.UserEmail, pk.DateTimeStart });
+            entity.HasKey(e => e.Name);
 
-            // Set FK to User
-            r.HasOne(r => r.User)
-                .WithMany(u => u.Requests)
-                .HasForeignKey(fk => fk.UserEmail);
-            // Set FK to Slot
-            r.HasOne(r => r.Slot)
-                .WithMany(s => s.Requests)
-                .HasForeignKey(fk => fk.SlotId);
+            entity.ToTable("prices_type");
 
-            // Set Datetimes as DATETIME type
-            r.Property(r => r.DateTimeStart)
-                .HasColumnType("DATETIME");
-            r.Property(r => r.DateTimeEnd)
-                .HasColumnType("DATETIME");
+            entity.Property(e => e.Name).HasColumnName("name");
+        });
 
-            // Set Paid as bool type with default value false
-            r.Property(r => r.Paid)
+        modelBuilder.Entity<Request>(entity =>
+        {
+            entity.HasKey(e => new { e.Email, e.DatetimeStart });
+
+            entity.ToTable("requests");
+
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.DatetimeStart)
+                .HasColumnType("DATETIME")
+                .HasColumnName("datetime_start");
+            entity.Property(e => e.DatetimeEnd)
+                .HasColumnType("DATETIME")
+                .HasColumnName("datetime_end");
+            entity.Property(e => e.Kw)
+                .HasDefaultValueSql("NULL")
+                .HasColumnName("kw");
+            entity.Property(e => e.Paid)
+                .HasDefaultValueSql("FALSE")
                 .HasColumnType("BOOLEAN")
-                .HasDefaultValue(false);
+                .HasColumnName("paid");
+            entity.Property(e => e.SlotId).HasColumnName("slot_id");
 
-            // Check Datetimes
-            r.ToTable(c => c.HasCheckConstraint("CK_Reservation_DateTime", "DateTimeStart < DateTimeEnd"));
+            entity.HasOne(d => d.EmailNavigation).WithMany(p => p.Requests)
+                .HasForeignKey(d => d.Email)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Slot).WithMany(p => p.Requests)
+                .HasForeignKey(d => d.SlotId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
+
+        modelBuilder.Entity<Reservation>(entity =>
+        {
+            entity.HasKey(e => new { e.Email, e.DatetimeStart });
+
+            entity.ToTable("reservations");
+
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.DatetimeStart)
+                .HasColumnType("DATETIME")
+                .HasColumnName("datetime_start");
+            entity.Property(e => e.DatetimeEnd)
+                .HasColumnType("DATETIME")
+                .HasColumnName("datetime_end");
+            entity.Property(e => e.SlotId).HasColumnName("slot_id");
+
+            entity.HasOne(d => d.EmailNavigation).WithMany(p => p.Reservations)
+                .HasForeignKey(d => d.Email)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Slot).WithMany(p => p.Reservations)
+                .HasForeignKey(d => d.SlotId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<Slot>(entity =>
+        {
+            entity.ToTable("slots");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Status).HasColumnName("status");
+
+            entity.HasOne(d => d.StatusNavigation).WithMany(p => p.Slots)
+                .HasForeignKey(d => d.Status)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<SlotsStatus>(entity =>
+        {
+            entity.HasKey(e => e.Status);
+
+            entity.ToTable("slots_status");
+
+            entity.Property(e => e.Status).HasColumnName("status");
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Email);
+
+            entity.ToTable("users");
+
+            entity.HasIndex(e => new { e.Email, e.Password }, "IX_users_email_password").IsUnique();
+
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Password).HasColumnName("password");
+            entity.Property(e => e.Surname).HasColumnName("surname");
+            entity.Property(e => e.Type)
+                .HasDefaultValue("BASE")
+                .HasColumnName("type");
+
+            entity.HasOne(d => d.TypeNavigation).WithMany(p => p.Users)
+                .HasForeignKey(d => d.Type)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<UsersType>(entity =>
+        {
+            entity.HasKey(e => e.Name);
+
+            entity.ToTable("users_type");
+
+            entity.Property(e => e.Name).HasColumnName("name");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
     }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

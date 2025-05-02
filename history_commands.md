@@ -36,10 +36,23 @@ dotnet add Server/Backend package Microsoft.EntityFrameworkCore.Tools --version 
 dotnet add Server/Backend package Microsoft.EntityFrameworkCore.Sqlite --version 9.0.4
 ```
 
+## Entity Framework Scaffolding
+
+```sh
+mkdir './Server/Backend/DB'
+
+# BEWARE! "SmartParking.schema" CONTAINS 'DROP TABLE IF EXISTS' queries
+sqlite3 './Server/Backend/DB/SmartParking.db' < './Server/Backend/SmartParking.schema'
+
+dotnet ef --project Server/Backend dbcontext scaffold Name=SmartParking Microsoft.EntityFrameworkCore.Sqlite -o Models
+```
+
 ## Make DB Migrations
 
 ```sh
 dotnet ef --project Server/Backend migrations add MIGRATION_NAME
+
+dotnet ef --project Server/Backend migrations list
 
 dotnet ef --project Server/Backend migrations remove
 
