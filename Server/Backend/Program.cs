@@ -1,6 +1,8 @@
 using Backend.Api;
 using Backend.Components;
 using Backend.Data;
+using Backend.Repositories;
+using Backend.Services;
 using Backend.Swagger;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -62,6 +64,9 @@ builder.Services.AddEndpointsApiExplorer()
     });
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 WebApplication app = builder.Build();
 

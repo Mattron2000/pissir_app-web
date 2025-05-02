@@ -1,7 +1,5 @@
-using Backend.Data;
-using Backend.Models;
+using Backend.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 using Shared.DTOs;
 
 namespace Backend.Api;
@@ -18,15 +16,10 @@ public class UserApi : IApiEndpoint
         userApi.MapGet("/", GetAllUsers);
     }
 
-    private static async Task<Ok<UserDTO[]>> GetAllUsers(SmartParkingContext context)
+    private static async Task<Ok<UserDTO[]>> GetAllUsers(UserService service)
     {
-        UserDTO[] users = await context.Users.Select(user => new UserDTO(
-            user.Email,
-            user.Name,
-            user.Surname,
-            user.Type
-        )).ToArrayAsync();
-
-        return TypedResults.Ok(users);
+        return TypedResults.Ok(
+            await service.GetAllUsersAsync()
+        );
     }
 }
