@@ -2,6 +2,7 @@ using Backend.Data;
 using Backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Shared.DTOs;
 
 namespace Backend.Api;
 
@@ -12,14 +13,19 @@ public class UserApi : IApiEndpoint
         MapV1(app.MapGroup("/api/v1/users"));
     }
 
-    private void MapV1(RouteGroupBuilder userApi)
+    private static void MapV1(RouteGroupBuilder userApi)
     {
         userApi.MapGet("/", GetAllUsers);
     }
 
-    private static async Task<Ok<User[]>> GetAllUsers(SmartParkingContext context)
+    private static async Task<Ok<UserDTO[]>> GetAllUsers(SmartParkingContext context)
     {
-        var users = await context.Users.ToArrayAsync();
+        UserDTO[] users = await context.Users.Select(user => new UserDTO(
+            user.Email,
+            user.Name,
+            user.Surname,
+            user.Type
+        )).ToArrayAsync();
 
         return TypedResults.Ok(users);
     }

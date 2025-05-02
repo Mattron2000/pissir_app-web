@@ -60,3 +60,16 @@ dotnet ef --project Server/Backend migrations script
 
 dotnet ef --project Server/Backend database update
 ```
+
+## Create new Project to contain shared contents between Backend and Frontend
+
+```sh
+dotnet new classlib -o Server/Shared
+
+dotnet sln Server add Server/Shared
+
+dotnet add Server/Backend reference Server/Shared
+
+dotnet add Server/Frontend reference Server/Shared
+```
+```
