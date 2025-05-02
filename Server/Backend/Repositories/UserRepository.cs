@@ -12,4 +12,9 @@ public class UserRepository(SmartParkingContext context) : IUserRepository
     {
         return await _context.Users.ToArrayAsync();
     }
+
+    public Task<User?> GetUserByEmailAsync(string email)
+    {
+        return _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+    }
 }
