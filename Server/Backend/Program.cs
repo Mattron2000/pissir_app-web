@@ -1,3 +1,4 @@
+using Backend.Api;
 using Backend.Components;
 using Backend.Data;
 using Microsoft.EntityFrameworkCore;
@@ -51,5 +52,14 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Frontend._Imports).Assembly);
+
+// Automatically map all minimal APIs
+var apiEndpoints = typeof(Program).Assembly
+    .GetTypes()
+    .Where(t => typeof(IApiEndpoint).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+    .Select(Activator.CreateInstance)
+    .Cast<IApiEndpoint>();
+
+foreach (var endpoint in apiEndpoints) endpoint.MapEndpoints(app);
 
 app.Run();
