@@ -5,7 +5,7 @@ using Backend.Swagger;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -61,7 +61,9 @@ builder.Services.AddEndpointsApiExplorer()
         });
     });
 
-var app = builder.Build();
+builder.Services.AddHttpClient();
+
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -88,12 +90,12 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(Frontend._Imports).Assembly);
 
 // Automatically map all minimal APIs
-var apiEndpoints = typeof(Program).Assembly
+IEnumerable<IApiEndpoint> apiEndpoints = typeof(Program).Assembly
     .GetTypes()
     .Where(t => typeof(IApiEndpoint).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
     .Select(Activator.CreateInstance)
     .Cast<IApiEndpoint>();
 
-foreach (var endpoint in apiEndpoints) endpoint.MapEndpoints(app);
+foreach (IApiEndpoint endpoint in apiEndpoints) endpoint.MapEndpoints(app);
 
 app.Run();
