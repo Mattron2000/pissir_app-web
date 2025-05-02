@@ -1,6 +1,7 @@
 using Backend.Api;
 using Backend.Components;
 using Backend.Data;
+using Backend.Swagger;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -19,11 +20,44 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
+        options.DocumentFilter<RemovePrefixDocumentFilter>("/api/v1");
+
         options.SwaggerDoc("v1", new OpenApiInfo
         {
             Version = "v1",
             Title = "SmartParking API",
-            Description = "An ASP.NET Core Web API for managing a smart parking system."
+            Description = "An ASP.NET Core Minimal API for managing a smart parking system."
+        });
+
+        options.AddServer(new OpenApiServer
+        {
+            Url = "{protocol}://{host}:{port}/api/v{version}",
+            Description = "Local Development Server",
+            Variables = new Dictionary<string, OpenApiServerVariable>
+            {
+                ["protocol"] = new OpenApiServerVariable
+                {
+                    Default = "http",
+                    Description = "The protocol used for the local development server.",
+                    Enum = ["http", "https"]
+                },
+                ["host"] = new OpenApiServerVariable
+                {
+                    Default = "localhost",
+                    Description = "The host name for the local development server."
+                },
+                ["port"] = new OpenApiServerVariable
+                {
+                    Default = "5123",
+                    Description = "The port number for the local development server."
+                },
+                ["version"] = new OpenApiServerVariable
+                {
+                    Default = "1",
+                    Description = "The version of the API.",
+                    Enum = ["1"]
+                }
+            }
         });
     });
 
