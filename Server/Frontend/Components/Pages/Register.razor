@@ -1,0 +1,85 @@
+@page "/pages/Register"
+@rendermode InteractiveWebAssembly
+
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+
+<PageTitle>@Title</PageTitle>
+
+@if (! OperatingSystem.IsBrowser())
+{
+    <LoadingSpinner Name="@(Title + " WebAssembly")" />
+    return;
+}
+
+<h3>User Registration</h3>
+
+@if (! String.IsNullOrEmpty(Reason))
+{
+    <div class="alert alert-@(StatusValidation ? "success" : "warning") alert-dismissible d-flex align-items-center)">
+        <span class="bi @(StatusValidation ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill")"></span>
+        <strong class="me-2">@StatusCode</strong> @Reason
+        <button type="button" class="btn-close" @onclick="() => Reason = String.Empty"></button>
+    </div>
+}
+
+<EditForm Model="@registerUser" OnSubmit="HandleRegisterSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger"/>
+
+    <div class="mb-3 form-item">
+        <label for="email" class="form-label">Email:</label>
+        <InputText id="email" class="form-control" @bind-Value="registerUser.Email" />
+    </div>
+
+    <div class="mb-3 form-item">
+        <label for="password" class="form-label">Password:</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="registerUser.Password" />
+    </div>
+
+    <div class="mb-3 form-item">
+        <label for="name" class="form-label">Name:</label>
+        <InputText id="name" class="form-control" @bind-Value="registerUser.Name" />
+    </div>
+
+    <div class="mb-3 form-item">
+        <label for="surname" class="form-label">Surname:</label>
+        <InputText id="surname" class="form-control" @bind-Value="registerUser.Surname" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+<br>
+
+<div>Already registered? <a href="@LoginPath">Login</a></div>
+
+@code {
+    private readonly string Title = "Register";
+    private readonly string LoginPath = "/pages/Login";
+    private UserRegisterDTO registerUser = new();
+    private bool StatusValidation = false;
+    private string StatusCode = String.Empty;
+    private string Reason = String.Empty;
+
+    private async Task HandleRegisterSubmit()
+    {
+        var validationContext = new ValidationContext(registerUser);
+        var validationResults = new List<ValidationResult>();
+
+        StatusValidation = Validator.TryValidateObject(registerUser, validationContext, validationResults, true);
+
+        if (! StatusValidation)
+        {
+            StatusCode = "";
+            Reason = "Please respect the validator suggestions";
+            return;
+        }
+
+        var response = await Http.PostAsJsonAsync("api/v1/users", registerUser);
+
+        StatusValidation = response.IsSuccessStatusCode;
+        StatusCode = response.StatusCode + "";
+        Reason = response.ReasonPhrase + "";
+    }
+}
