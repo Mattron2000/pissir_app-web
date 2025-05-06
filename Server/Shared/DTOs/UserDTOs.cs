@@ -5,7 +5,7 @@ namespace Shared.DTOs;
 public class UserRegisterDTO
 {
     [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email format")]
+    [EmailAddress(ErrorMessage = "Email is not valid")]
     public string Email { get; set; }
 
     [Required(ErrorMessage = "Password is required")]
@@ -17,6 +17,10 @@ public class UserRegisterDTO
     public string Name { get; set; }
 
     [Required(ErrorMessage = "Surname is required")]
-    [RegularExpression(@"^[A-Z][a-zA-Z'\s]*$", ErrorMessage = "Name must contain only letters, start with a capital letter and may contain apostrophes for composite names")]
+    [RegularExpression(@"^[A-Z][a-zA-Z'\s]*$", ErrorMessage = "Surname must contain only letters, start with a capital letter and may contain apostrophes for composite names")]
     public string Surname { get; set; }
 }
+
+public record class UserEntityDTO(string Email, string Name, string Surname, string Type);
+
+public record class UserMessageDTO(string Message);

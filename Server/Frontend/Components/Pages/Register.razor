@@ -69,17 +69,21 @@
 
         StatusValidation = Validator.TryValidateObject(registerUser, validationContext, validationResults, true);
 
-        if (! StatusValidation)
+        if (!StatusValidation)
         {
             StatusCode = "";
             Reason = "Please respect the validator suggestions";
             return;
         }
 
-        var response = await Http.PostAsJsonAsync("api/v1/users", registerUser);
+        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/register", registerUser);
 
         StatusValidation = response.IsSuccessStatusCode;
         StatusCode = response.StatusCode + "";
-        Reason = response.ReasonPhrase + "";
+
+        if (StatusValidation)
+            Reason = "User registered successfully";
+        else
+            Reason = response.Content.ReadFromJsonAsync<UserMessageDTO>().Result.Message;
     }
 }
