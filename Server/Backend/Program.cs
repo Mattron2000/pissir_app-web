@@ -5,6 +5,7 @@ using Backend.Repositories;
 using Backend.Services;
 using Backend.Swagger;
 using FluentValidation;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Shared.DTOs;
@@ -22,6 +23,9 @@ builder.Services.AddDbContext<SmartParkingContext>(options =>
 );
 
 builder.Services.AddControllers();
+
+if (builder.Environment.IsDevelopment())
+{
 builder.Services.AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
@@ -65,10 +69,28 @@ builder.Services.AddEndpointsApiExplorer()
             }
         });
     });
+}
+
+builder.Services.AddRateLimiter(_ => _.AddFixedWindowLimiter("default", options =>
+{
+    options.PermitLimit = 10;
+    options.Window = TimeSpan.FromMinutes(1);
+}));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Restricted", policy =>
+    {
+        policy.WithOrigins("http://localhost:5123", "https://localhost:5123")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserValidator>();
+builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
+builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -99,7 +121,9 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Frontend._Imports).Assembly);
 
-//Automatically map all minimal APIs
+app.UseCors("Restricted");
+
+// Automatically map all minimal APIs
 IEnumerable<IApiEndpoint> apiEndpoints = typeof(Program).Assembly
     .GetTypes()
     .Where(t => typeof(IApiEndpoint).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)

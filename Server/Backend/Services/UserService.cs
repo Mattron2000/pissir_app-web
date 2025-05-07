@@ -10,7 +10,7 @@ public enum UserResultEnum
     Success,
     Failed,
     UserAlreadyExists,
-    BadRequest
+    UserNotFound
 }
 
 public class UserResponse
@@ -33,6 +33,7 @@ public class UserResponse
             ErrorMessage = reason ?? result switch
             {
                 UserResultEnum.UserAlreadyExists => "User already exists",
+                UserResultEnum.UserNotFound => "User not found",
                 _ => null
             }
         };
@@ -46,10 +47,6 @@ public class UserService(IUserRepository repository, IValidator<UserRegisterDTO>
 
     internal async Task<UserResponse> CreateUserByRegistrationAsync(UserRegisterDTO userDto)
     {
-        var result = await _validator.ValidateAsync(userDto);
-        if (!result.IsValid)
-            return UserResponse.Failed(UserResultEnum.BadRequest, string.Join("; ", result.Errors.Select(e => e.ErrorMessage)));
-
         if (await _repository.CheckUserIfExistsByEmailAsync(userDto.Email))
             return UserResponse.Failed(UserResultEnum.UserAlreadyExists);
 
@@ -61,6 +58,23 @@ public class UserService(IUserRepository repository, IValidator<UserRegisterDTO>
                 userDto.Name,
                 userDto.Surname,
                 UsersTypeEnum.BASE.ToString()
+            )
+        );
+    }
+
+    internal async Task<UserResponse> GetUserByLoginAsync(UserLoginDTO userDto)
+    {
+        User? user = await _repository.GetUserByEmailAndPasswordAsync(userDto.Email, userDto.Password);
+
+        if (user == null)
+            return UserResponse.Failed(UserResultEnum.UserNotFound);
+
+        return UserResponse.Success(
+            new UserEntityDTO(
+                user.Email,
+                user.Name,
+                user.Surname,
+                user.Type
             )
         );
     }

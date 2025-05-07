@@ -13,3 +13,9 @@ public record class UserEntityDTO(string Email, string Name, string Surname, str
 public record class UserMessageDTO(string Message);
 
 public record class UserMessagesDTO(string[] Messages);
+
+public record class UserLoginDTO()
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}

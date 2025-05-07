@@ -34,4 +34,14 @@ public class UserRepository(SmartParkingContext context) : IUserRepository
             return false;
         }
     }
+
+    public async Task<User?> GetUserByEmailAndPasswordAsync(string email, string password)
+    {
+        User? user = await Context.Users.FindAsync(email);
+
+        if (user == null)
+            return null;
+
+        return user.Password == password ? user : null;
+    }
 }

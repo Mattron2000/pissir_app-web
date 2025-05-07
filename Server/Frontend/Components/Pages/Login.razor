@@ -1,4 +1,4 @@
-@page "/pages/Register"
+@page "/pages/Login"
 @rendermode InteractiveWebAssembly
 
 @using FluentValidation
@@ -6,7 +6,7 @@
 
 @inject HttpClient Http
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
-@inject IValidator<UserRegisterDTO> Validator
+@inject IValidator<UserLoginDTO> Validator
 
 <PageTitle>@Title</PageTitle>
 
@@ -37,38 +37,28 @@
 </ul>
 }
 
-<EditForm Model="@registerUser" OnSubmit="HandleRegisterSubmit">
+<EditForm Model="@loginUser" OnSubmit="HandleRegisterSubmit">
     <div class="mb-3 max-width-item">
         <label for="email" class="form-label">Email:</label>
-        <InputText class="form-control" @bind-Value="registerUser.Email" />
+        <InputText class="form-control" @bind-Value="loginUser.Email" />
     </div>
 
     <div class="mb-3 max-width-item">
         <label for="password" class="form-label">Password:</label>
-        <InputText class="form-control" type="password"  @bind-Value="registerUser.Password" />
+        <InputText class="form-control" type="password"  @bind-Value="loginUser.Password" />
     </div>
 
-    <div class="mb-3 max-width-item">
-        <label for="name" class="form-label">Name:</label>
-        <InputText class="form-control" @bind-Value="registerUser.Name" />
-    </div>
-
-    <div class="mb-3 max-width-item">
-        <label for="surname" class="form-label">Surname:</label>
-        <InputText class="form-control" @bind-Value="registerUser.Surname" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Register</button>
+    <button type="submit" class="btn btn-primary">Login</button>
 </EditForm>
 
 <br>
 
-<div>Already registered? <a href="@LoginPath">Login</a></div>
+<div>Don't have an account? <a href="@RegisterPath">Register</a></div>
 
 @code {
-    private readonly string Title = "Register";
-    private readonly string LoginPath = "/pages/Login";
-    private UserRegisterDTO registerUser = new();
+    private readonly string Title = "Login";
+    private readonly string RegisterPath = "/pages/Register";
+    private UserLoginDTO loginUser = new();
     private bool StatusValidation = false;
     private string StatusCode = string.Empty;
     private string Reason = string.Empty;
@@ -76,8 +66,8 @@
 
     private async Task HandleRegisterSubmit()
     {
-        var validator = new UserRegisterValidator();
-        var results = validator.Validate(registerUser);
+        var validator = new UserLoginValidator();
+        var results = validator.Validate(loginUser);
 
         StatusValidation = results.IsValid;
         errors = results.Errors.Select(e => e.ErrorMessage).ToList();
@@ -92,13 +82,13 @@
             StatusCode = "";
         }
 
-        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/register", registerUser);
+        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/login", loginUser);
 
         StatusValidation = response.IsSuccessStatusCode;
         StatusCode = response.StatusCode + "";
 
         if (StatusValidation)
-            Reason = "User registered successfully";
+            Reason = "User logged in successfully";
         else
             Reason = response.Content.ReadFromJsonAsync<UserMessageDTO>().Result?.Message ?? "Unknown error";
     }
