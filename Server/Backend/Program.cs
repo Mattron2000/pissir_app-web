@@ -4,8 +4,11 @@ using Backend.Data;
 using Backend.Repositories;
 using Backend.Services;
 using Backend.Swagger;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Shared.DTOs;
+using Shared.FluentValidation;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +67,8 @@ builder.Services.AddEndpointsApiExplorer()
     });
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserValidator>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();

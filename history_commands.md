@@ -72,4 +72,9 @@ dotnet add Server/Backend reference Server/Shared
 
 dotnet add Server/Frontend reference Server/Shared
 ```
+
+## Fluent Validation
+
+```sh
+dotnet add Server/Shared package FluentValidation --version 12.0.0
 ```

@@ -73,14 +73,6 @@ public partial class SmartParkingContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.ToTable(t =>
-            {
-                t.HasCheckConstraint("CK_User_Email_Format", "\"email\" LIKE '%_@%_.%'");
-                t.HasCheckConstraint("CK_User_Password_Length", "LENGTH(\"password\") >= 8");
-                t.HasCheckConstraint("CK_User_Name_Length", "LENGTH(\"name\") > 0");
-                t.HasCheckConstraint("CK_User_Surname_Length", "LENGTH(\"surname\") > 0");
-            });
-
             // Seed admin user data
             entity.HasData(
                 new User {

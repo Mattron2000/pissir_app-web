@@ -39,12 +39,18 @@ public class UserResponse
         };
 }
 
-public class UserService(IUserRepository repository)
+public class UserService(IUserRepository repository, IValidator<UserRegisterDTO> validator)
 {
+    private readonly IValidator<UserRegisterDTO> _validator = validator;
+
     private readonly IUserRepository _repository = repository;
 
     internal async Task<UserResponse> CreateUserByRegistrationAsync(UserRegisterDTO userDto)
     {
+        var result = await _validator.ValidateAsync(userDto);
+        if (!result.IsValid)
+            return UserResponse.Failed(UserResultEnum.BadRequest, string.Join("; ", result.Errors.Select(e => e.ErrorMessage)));
+
         if (await _repository.CheckUserIfExistsByEmailAsync(userDto.Email))
             return UserResponse.Failed(UserResultEnum.UserAlreadyExists);
 
