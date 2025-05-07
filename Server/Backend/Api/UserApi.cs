@@ -6,7 +6,7 @@ namespace Backend.Api;
 
 internal interface IUserApi
 {
-    Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessageDTO>, ProblemHttpResult>> Register(UserRegisterDTO user, UserService service);
+    Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO user, UserService service);
 }
 
 public class UserApi : IApiEndpoint, IUserApi
@@ -23,7 +23,7 @@ public class UserApi : IApiEndpoint, IUserApi
         userApi.MapPost("/register", Register);
     }
 
-    public async Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessageDTO>, ProblemHttpResult>> Register(UserRegisterDTO userDto, UserService service)
+    public async Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO userDto, UserService service)
     {
         UserResponse response = await service.CreateUserByRegistrationAsync(userDto);
 
@@ -36,14 +36,11 @@ public class UserApi : IApiEndpoint, IUserApi
         if (response.Result == UserResultEnum.Success && response.User != null)
             return TypedResults.Created($"/api/v1/users/{response.User.Email}", response.User);
 
-        if (response.Result == UserResultEnum.BadRequest && response.ErrorMessage != null)
-            return TypedResults.BadRequest(new UserMessageDTO(response.ErrorMessage));
-
         if (response.Result == UserResultEnum.UserAlreadyExists && response.ErrorMessage != null)
             return TypedResults.Conflict(new UserMessageDTO(response.ErrorMessage));
 
-        if (response.Result == UserResultEnum.UserInsertFailed && response.ErrorMessage != null)
-            return TypedResults.BadRequest(new UserMessageDTO(response.ErrorMessage));
+        if (response.Result == UserResultEnum.BadRequest && response.ErrorMessage != null)
+            return TypedResults.BadRequest(new UserMessagesDTO(response.ErrorMessage.Split("; ")));
 
         if (response.Result == UserResultEnum.Failed && response.ErrorMessage != null)
             return TypedResults.Problem(

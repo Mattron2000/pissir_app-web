@@ -20,10 +20,12 @@ public class UserValidator : AbstractValidator<UserRegisterDTO>
 
         RuleFor(u => u.Name)
             .NotEmpty().WithMessage("Name is required.")
+            .Matches(@"^[A-Z][a-z]+$").WithMessage("Name must start with an uppercase letter and contain only valid characters.")
             .MaximumLength(50).WithMessage("Name can't be longer than 50 characters.");
 
         RuleFor(u => u.Surname)
             .NotEmpty().WithMessage("Surname is required.")
+            .Matches(@"^[A-Z][a-z]+$").WithMessage("Surname must start with an uppercase letter and contain only valid characters.")
             .MaximumLength(50).WithMessage("Surname can't be longer than 50 characters.");
     }
 }

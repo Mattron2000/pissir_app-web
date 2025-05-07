@@ -1,5 +1,6 @@
 using Backend.Models;
 using Backend.Repositories;
+using FluentValidation;
 using Shared.DTOs;
 
 namespace Backend.Services;
@@ -9,7 +10,6 @@ public enum UserResultEnum
     Success,
     Failed,
     UserAlreadyExists,
-    UserInsertFailed,
     BadRequest
 }
 
@@ -33,7 +33,6 @@ public class UserResponse
             ErrorMessage = reason ?? result switch
             {
                 UserResultEnum.UserAlreadyExists => "User already exists",
-                UserResultEnum.UserInsertFailed => "An error occurred while attempting to register the user",
                 _ => null
             }
         };
@@ -54,8 +53,7 @@ public class UserService(IUserRepository repository, IValidator<UserRegisterDTO>
         if (await _repository.CheckUserIfExistsByEmailAsync(userDto.Email))
             return UserResponse.Failed(UserResultEnum.UserAlreadyExists);
 
-        if (!await _repository.InsertUserAsync(userDto.Email, userDto.Password, userDto.Name, userDto.Surname))
-            return UserResponse.Failed(UserResultEnum.UserInsertFailed);
+        await _repository.InsertUserAsync(userDto.Email, userDto.Password, userDto.Name, userDto.Surname);
 
         return UserResponse.Success(
             new UserEntityDTO(

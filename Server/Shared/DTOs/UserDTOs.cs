@@ -11,3 +11,5 @@ public record class UserRegisterDTO()
 public record class UserEntityDTO(string Email, string Name, string Surname, string Type);
 
 public record class UserMessageDTO(string Message);
+
+public record class UserMessagesDTO(string[] Messages);
