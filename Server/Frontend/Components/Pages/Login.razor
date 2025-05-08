@@ -2,15 +2,18 @@
 @rendermode InteractiveWebAssembly
 
 @using FluentValidation
+@using Frontend.States
 @using Shared.FluentValidation
 
 @inject HttpClient Http
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
 @inject IValidator<UserLoginDTO> Validator
+@inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
 
 <PageTitle>@Title</PageTitle>
 
-@if (! OperatingSystem.IsBrowser())
+@if (!OperatingSystem.IsBrowser())
 {
     <LoadingSpinner Name="@(Title + " WebAssembly")" />
     return;
@@ -18,10 +21,19 @@
 
 <h3>User Login</h3>
 
+@if (AuthState.User != null)
+{
+    <div class="alert alert-success d-flex max-width-item">
+        <span class="bi bi-check-circle-fill"></span>
+        <strong class="me-2">Success</strong> You are logged in as @AuthState.User.Surname @AuthState.User.Name
+    </div>
+    return;
+}
+
 @if (!string.IsNullOrEmpty(Reason))
 {
-    <div class="alert alert-@(StatusValidation ? "success" : "warning") alert-dismissible d-flex max-width-item">
-        <span class="bi @(StatusValidation ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill")"></span>
+    <div class="alert alert-warning alert-dismissible d-flex max-width-item">
+        <span class="bi bi-exclamation-triangle-fill"></span>
         <strong class="me-2">@StatusCode</strong> @Reason
         <button type="button" class="btn-close" @onclick="() => Reason = string.Empty"></button>
     </div>
@@ -37,7 +49,7 @@
 </ul>
 }
 
-<EditForm Model="@loginUser" OnSubmit="HandleRegisterSubmit">
+<EditForm Model="@loginUser" OnSubmit="HandleLoginSubmit">
     <div class="mb-3 max-width-item">
         <label for="email" class="form-label">Email:</label>
         <InputText class="form-control" @bind-Value="loginUser.Email" />
@@ -53,33 +65,30 @@
 
 <br>
 
-<div>Don't have an account? <a href="@RegisterPath">Register</a></div>
+<div>Don't have an account? <a href="/pages/Register">Register</a></div>
 
 @code {
     private readonly string Title = "Login";
-    private readonly string RegisterPath = "/pages/Register";
     private UserLoginDTO loginUser = new();
-    private bool StatusValidation = false;
-    private string StatusCode = string.Empty;
     private string Reason = string.Empty;
+    private string StatusCode = string.Empty;
     private List<string> errors = new();
 
-    private async Task HandleRegisterSubmit()
+    private async Task HandleLoginSubmit()
     {
         var validator = new UserLoginValidator();
         var results = validator.Validate(loginUser);
 
-        StatusValidation = results.IsValid;
+        var StatusValidation = results.IsValid;
         errors = results.Errors.Select(e => e.ErrorMessage).ToList();
+
+        StatusCode = "";
         Reason = string.Empty;
 
         if (!StatusValidation)
         {
-            StatusCode = "";
             Reason = "Please respect the validator suggestions";
             return;
-        } else {
-            StatusCode = "";
         }
 
         HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/login", loginUser);
@@ -88,8 +97,12 @@
         StatusCode = response.StatusCode + "";
 
         if (StatusValidation)
+        {
             Reason = "User logged in successfully";
-        else
-            Reason = response.Content.ReadFromJsonAsync<UserMessageDTO>().Result?.Message ?? "Unknown error";
+            AuthState.SetUser(response.Content.ReadFromJsonAsync<UserEntityDTO>().Result);
+            return;
+        }
+
+        Reason = response.Content.ReadFromJsonAsync<UserMessageDTO>().Result?.Message ?? "Unknown error";
     }
 }

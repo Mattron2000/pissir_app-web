@@ -1,4 +1,5 @@
 using FluentValidation;
+using Frontend.States;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shared.DTOs;
 using Shared.FluentValidation;
@@ -11,5 +12,8 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
 builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
+
+builder.Services.AddSingleton<AuthStateNotifier>();
+builder.Services.AddSingleton<AuthState>();
 
 await builder.Build().RunAsync();

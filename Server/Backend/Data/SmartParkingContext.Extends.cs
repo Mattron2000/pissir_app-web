@@ -77,7 +77,7 @@ public partial class SmartParkingContext
             entity.HasData(
                 new User {
                     Email = "admin@gmail.com",
-                    Password = "AdminAdmin123",
+                    Password = "Admin123",
                     Type = UsersTypeEnum.ADMIN.ToString(),
                     Name = "Matteo",
                     Surname = "Palmieri",

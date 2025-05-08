@@ -5,6 +5,7 @@ using Backend.Repositories;
 using Backend.Services;
 using Backend.Swagger;
 using FluentValidation;
+using Frontend.States;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -94,6 +95,9 @@ builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddSingleton<AuthState>();
+builder.Services.AddSingleton<AuthStateNotifier>();
 
 WebApplication app = builder.Build();
 
