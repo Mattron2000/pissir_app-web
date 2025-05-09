@@ -2,6 +2,7 @@ using Backend.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Shared.DTOs;
+using Shared.FluentValidators;
 
 namespace Backend.Api;
 
@@ -9,6 +10,7 @@ internal interface IUserApi
 {
     Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO user, UserService service, IValidator<UserRegisterDTO> validator);
     Task<Results<Ok<UserEntityDTO>, NotFound<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Login(UserLoginDTO userDto, UserService service, IValidator<UserLoginDTO> validator);
+    Task<Results<Ok<UserEntityDTO>, NotFound<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> SwitchUserType(string email, UserService service, EmailValidator validator);
 }
 
 public class UserApi : IApiEndpoint, IUserApi
@@ -24,6 +26,7 @@ public class UserApi : IApiEndpoint, IUserApi
     {
         userApi.MapPost("/register", Register);
         userApi.MapPost("/login", Login);
+        userApi.MapPatch("/users/{email}/type", SwitchUserType);
     }
 
     public async Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO userDto, UserService service, IValidator<UserRegisterDTO> validator)
@@ -71,7 +74,7 @@ public class UserApi : IApiEndpoint, IUserApi
         if (response == null)
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
-                title: "User Registration Failed: response is null"
+                title: "User Login Failed: response is null"
             );
 
         if (response.Result == UserResultEnum.Success && response.User != null)
@@ -84,6 +87,47 @@ public class UserApi : IApiEndpoint, IUserApi
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
                 title: "User Login Failed",
+                detail: response.ErrorMessage
+            );
+
+        return TypedResults.Problem(
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "Unknown Error"
+        );
+    }
+
+    public async Task<Results<Ok<UserEntityDTO>, NotFound<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> SwitchUserType(string email, UserService service, EmailValidator validator)
+    {
+        var result = await validator.ValidateAsync(email);
+
+        if (!result.IsValid)
+            return TypedResults.BadRequest(new UserMessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+
+        UserResponse response = await service.SwitchUserTypeAsync(email);
+
+        if (response == null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "User Update Failed: response is null"
+            );
+
+        if (response.Result == UserResultEnum.Success && response.User != null)
+            return TypedResults.Ok(response.User);
+
+        if (response.Result == UserResultEnum.UserNotFound && response.ErrorMessage != null)
+            return TypedResults.NotFound(new UserMessageDTO(response.ErrorMessage));
+
+        if (response.Result == UserResultEnum.Forbid && response.ErrorMessage != null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status403Forbidden,
+                title: "User Type Update Forbidden",
+                detail: response.ErrorMessage
+            );
+
+        if (response.Result == UserResultEnum.Failed && response.ErrorMessage != null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "User Type Update Failed",
                 detail: response.ErrorMessage
             );
 

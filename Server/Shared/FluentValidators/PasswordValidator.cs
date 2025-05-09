@@ -1,17 +1,12 @@
 using FluentValidation;
-using Shared.DTOs;
 
-namespace Shared.FluentValidation;
+namespace Shared.FluentValidators;
 
-public class UserLoginValidator : AbstractValidator<UserLoginDTO>
+public class PasswordValidator : AbstractValidator<string>
 {
-    public UserLoginValidator()
+    public PasswordValidator()
     {
-        RuleFor(u => u.Email)
-            .NotEmpty().WithMessage("Email is required.")
-            .EmailAddress().WithMessage("Invalid email format.");
-
-        RuleFor(u => u.Password)
+        RuleFor(x => x)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(8).WithMessage("Password must be at least 8 characters.")
             .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter.")

@@ -7,9 +7,9 @@ public class UserRepository(SmartParkingContext context) : IUserRepository
 {
     private readonly SmartParkingContext Context = context;
 
-    public async Task<bool> CheckUserIfExistsByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
-        return await Context.Users.FindAsync(email) != null;
+        return await Context.Users.FindAsync(email);
     }
 
     public async Task<bool> InsertUserAsync(string email, string password, string name, string surname)
@@ -35,13 +35,15 @@ public class UserRepository(SmartParkingContext context) : IUserRepository
         }
     }
 
-    public async Task<User?> GetUserByEmailAndPasswordAsync(string email, string password)
+    public async Task<bool> SetUserTypeAsync(string email, string type)
     {
-        User? user = await Context.Users.FindAsync(email);
+        var user = await Context.Users.FindAsync(email);
 
         if (user == null)
-            return null;
+            return false;
 
-        return user.Password == password ? user : null;
+        user.Type = type;
+
+        return await Context.SaveChangesAsync() == 1;
     }
 }

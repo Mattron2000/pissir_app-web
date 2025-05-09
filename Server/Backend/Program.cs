@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Shared.DTOs;
-using Shared.FluentValidation;
+using Shared.FluentValidators;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +98,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddSingleton<AuthState>();
 builder.Services.AddSingleton<AuthStateNotifier>();
+
+builder.Services.AddSingleton<EmailValidator>();
 
 WebApplication app = builder.Build();
 

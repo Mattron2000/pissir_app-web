@@ -19,3 +19,8 @@ public record class UserLoginDTO()
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
+
+public record class UserUpdateDTO()
+{
+    public string Email { get; set; } = string.Empty;
+}

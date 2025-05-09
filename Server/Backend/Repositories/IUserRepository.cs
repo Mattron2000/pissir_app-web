@@ -4,7 +4,7 @@ namespace Backend.Repositories;
 
 public interface IUserRepository
 {
-    Task<bool> CheckUserIfExistsByEmailAsync(string email);
+    Task<User?> GetUserByEmailAsync(string email);
     Task<bool> InsertUserAsync(string email, string password, string name, string surname);
-    Task<User?> GetUserByEmailAndPasswordAsync(string email, string password);
+    Task<bool> SetUserTypeAsync(string email, string type);
 }

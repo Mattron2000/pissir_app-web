@@ -2,7 +2,7 @@ using FluentValidation;
 using Frontend.States;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shared.DTOs;
-using Shared.FluentValidation;
+using Shared.FluentValidators;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -15,5 +15,7 @@ builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
 
 builder.Services.AddSingleton<AuthStateNotifier>();
 builder.Services.AddSingleton<AuthState>();
+
+builder.Services.AddSingleton<EmailValidator>();
 
 await builder.Build().RunAsync();
