@@ -99,6 +99,9 @@ builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidato
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+builder.Services.AddScoped<SlotService>();
+builder.Services.AddScoped<ISlotRepository, SlotRepository>();
+
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
