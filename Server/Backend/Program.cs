@@ -101,11 +101,14 @@ builder.Services.AddScoped<IFineRepository, FineRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddScoped<SlotService>();
-builder.Services.AddScoped<ISlotRepository, SlotRepository>();
+builder.Services.AddScoped<RequestService>();
+builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
+builder.Services.AddScoped<SlotService>();
+builder.Services.AddScoped<ISlotRepository, SlotRepository>();
 
 builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
 builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
