@@ -3,7 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Shared.DTOs;
 using Shared.DTOs.User;
-using Shared.FluentValidators;
+using Shared.FluentValidators.Properties;
 
 namespace Backend.Api;
 

@@ -3,6 +3,7 @@ using Frontend.States;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shared.DTOs.User;
 using Shared.FluentValidators;
+using Shared.FluentValidators.Properties;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 

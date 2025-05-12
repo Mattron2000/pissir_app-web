@@ -6,3 +6,11 @@ public record ReservationEntityDTO(
     DateTime DatetimeStart,
     DateTime DatetimeEnd
 );
+
+public record class ReservationCreateDTO()
+{
+    public string Email { get; set; } = string.Empty;
+    public int SlotId { get; set; }
+    public DateTime DatetimeStart { get; set; }
+    public DateTime DatetimeEnd { get; set; }
+}

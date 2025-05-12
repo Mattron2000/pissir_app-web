@@ -39,6 +39,12 @@ public class ReservationResponse
 public class ReservationService(IReservationRepository repository)
 {
     private readonly IReservationRepository _repository = repository;
+
+    internal async Task<ReservationResponse> CreateReservationAsync(ReservationCreateDTO reservation)
+    {
+        throw new NotImplementedException();
+    }
+
     internal async Task<ReservationResponse> GetUserReservationsAsync(string email)
     {
         Reservation[]? reservations = await _repository.GetUserReservationsAsync(email);

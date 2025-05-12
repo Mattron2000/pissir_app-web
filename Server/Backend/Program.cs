@@ -9,8 +9,10 @@ using Frontend.States;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Shared.DTOs.Reservation;
 using Shared.DTOs.User;
 using Shared.FluentValidators;
+using Shared.FluentValidators.Properties;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +94,7 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
 builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
+builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidator>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
