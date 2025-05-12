@@ -2,38 +2,32 @@ using Backend.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Shared.DTOs;
+using Shared.DTOs.User;
 using Shared.FluentValidators;
 
 namespace Backend.Api;
 
-internal interface IUserApi
+public class UserApi : IApiEndpoint
 {
-    Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO user, UserService service, IValidator<UserRegisterDTO> validator);
-    Task<Results<Ok<UserEntityDTO>, NotFound<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Login(UserLoginDTO userDto, UserService service, IValidator<UserLoginDTO> validator);
-    Task<Results<Ok<UserEntityDTO>, NotFound<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> SwitchUserType(string email, UserService service, EmailValidator validator);
-}
-
-public class UserApi : IApiEndpoint, IUserApi
-{
-    private readonly string RootApiV1 = "/api/v1";
+    private readonly string RootUserApiV1 = "/api/v1/users";
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        MapV1(app.MapGroup(RootApiV1));
+        MapV1(app.MapGroup(RootUserApiV1));
     }
 
     private void MapV1(RouteGroupBuilder userApi)
     {
         userApi.MapPost("/register", Register);
         userApi.MapPost("/login", Login);
-        userApi.MapPatch("/users/{email}/type", SwitchUserType);
+        userApi.MapPatch("/{email}/type", SwitchUserType);
     }
 
-    public async Task<Results<Created<UserEntityDTO>, Conflict<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO userDto, UserService service, IValidator<UserRegisterDTO> validator)
+    private async Task<Results<Created<UserEntityDTO>, Conflict<MessageDTO>, BadRequest<MessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO userDto, UserService service, IValidator<UserRegisterDTO> validator)
     {
         var result = await validator.ValidateAsync(userDto);
         if (!result.IsValid)
-            return TypedResults.BadRequest(new UserMessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
 
         UserResponse response = await service.CreateUserByRegistrationAsync(userDto);
 
@@ -47,7 +41,7 @@ public class UserApi : IApiEndpoint, IUserApi
             return TypedResults.Created($"/api/v1/users/{response.User.Email}", response.User);
 
         if (response.Result == UserResultEnum.UserAlreadyExists && response.ErrorMessage != null)
-            return TypedResults.Conflict(new UserMessageDTO(response.ErrorMessage));
+            return TypedResults.Conflict(new MessageDTO(response.ErrorMessage));
 
         if (response.Result == UserResultEnum.Failed && response.ErrorMessage != null)
             return TypedResults.Problem(
@@ -62,12 +56,12 @@ public class UserApi : IApiEndpoint, IUserApi
         );
     }
 
-    public async Task<Results<Ok<UserEntityDTO>, NotFound<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> Login(UserLoginDTO userDto, UserService service, IValidator<UserLoginDTO> validator)
+    private async Task<Results<Ok<UserEntityDTO>, NotFound<MessageDTO>, BadRequest<MessagesDTO>, ProblemHttpResult>> Login(UserLoginDTO userDto, UserService service, IValidator<UserLoginDTO> validator)
     {
         var result = await validator.ValidateAsync(userDto);
 
         if (!result.IsValid)
-            return TypedResults.BadRequest(new UserMessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
 
         UserResponse response = await service.GetUserByLoginAsync(userDto);
 
@@ -81,7 +75,7 @@ public class UserApi : IApiEndpoint, IUserApi
             return TypedResults.Ok(response.User);
 
         if (response.Result == UserResultEnum.UserNotFound && response.ErrorMessage != null)
-            return TypedResults.NotFound(new UserMessageDTO(response.ErrorMessage));
+            return TypedResults.NotFound(new MessageDTO(response.ErrorMessage));
 
         if (response.Result == UserResultEnum.Failed && response.ErrorMessage != null)
             return TypedResults.Problem(
@@ -96,12 +90,12 @@ public class UserApi : IApiEndpoint, IUserApi
         );
     }
 
-    public async Task<Results<Ok<UserEntityDTO>, NotFound<UserMessageDTO>, BadRequest<UserMessagesDTO>, ProblemHttpResult>> SwitchUserType(string email, UserService service, EmailValidator validator)
+    private async Task<Results<Ok<UserEntityDTO>, NotFound<MessageDTO>, BadRequest<MessagesDTO>, ProblemHttpResult>> SwitchUserType(string email, UserService service, EmailValidator validator)
     {
         var result = await validator.ValidateAsync(email);
 
         if (!result.IsValid)
-            return TypedResults.BadRequest(new UserMessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
 
         UserResponse response = await service.SwitchUserTypeAsync(email);
 
@@ -115,7 +109,7 @@ public class UserApi : IApiEndpoint, IUserApi
             return TypedResults.Ok(response.User);
 
         if (response.Result == UserResultEnum.UserNotFound && response.ErrorMessage != null)
-            return TypedResults.NotFound(new UserMessageDTO(response.ErrorMessage));
+            return TypedResults.NotFound(new MessageDTO(response.ErrorMessage));
 
         if (response.Result == UserResultEnum.Forbid && response.ErrorMessage != null)
             return TypedResults.Problem(

@@ -9,7 +9,7 @@ using Frontend.States;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Shared.DTOs;
+using Shared.DTOs.User;
 using Shared.FluentValidators;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -95,6 +95,9 @@ builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<ReservationService>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 builder.Services.AddSingleton<AuthState>();
 builder.Services.AddSingleton<AuthStateNotifier>();

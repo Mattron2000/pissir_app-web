@@ -1,5 +1,5 @@
 using FluentValidation;
-using Shared.DTOs;
+using Shared.DTOs.User;
 
 namespace Shared.FluentValidators;
 

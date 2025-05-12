@@ -1,7 +1,7 @@
 using Backend.Models;
 using Backend.Repositories;
 using FluentValidation;
-using Shared.DTOs;
+using Shared.DTOs.User;
 
 namespace Backend.Services;
 
@@ -41,10 +41,8 @@ public class UserResponse
         };
 }
 
-public class UserService(IUserRepository repository, IValidator<UserRegisterDTO> validator)
+public class UserService(IUserRepository repository)
 {
-    private readonly IValidator<UserRegisterDTO> _validator = validator;
-
     private readonly IUserRepository _repository = repository;
 
     internal async Task<UserResponse> CreateUserByRegistrationAsync(UserRegisterDTO userDto)
@@ -101,6 +99,21 @@ public class UserService(IUserRepository repository, IValidator<UserRegisterDTO>
         await _repository.SetUserTypeAsync(email, newType.ToString());
 
         return UserResponse.Success(
+            new UserEntityDTO(
+                user.Email,
+                user.Name,
+                user.Surname,
+                user.Type
+            )
+        );
+    }
+
+    internal async Task<UserResponse> GetUserByEmailAsync(string email)
+    {
+        User? user = await _repository.GetUserByEmailAsync(email);
+
+        if (user == null) return UserResponse.Failed(UserResultEnum.UserNotFound);
+        else return UserResponse.Success(
             new UserEntityDTO(
                 user.Email,
                 user.Name,

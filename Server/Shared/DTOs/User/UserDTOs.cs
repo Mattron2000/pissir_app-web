@@ -1,4 +1,4 @@
-namespace Shared.DTOs;
+namespace Shared.DTOs.User;
 
 public record class UserRegisterDTO()
 {
@@ -10,17 +10,13 @@ public record class UserRegisterDTO()
 
 public record class UserEntityDTO(string Email, string Name, string Surname, string Type);
 
-public record class UserMessageDTO(string Message);
-
-public record class UserMessagesDTO(string[] Messages);
-
 public record class UserLoginDTO()
 {
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
 
-public record class UserUpdateDTO()
+public record class UserUpdateTypeDTO()
 {
     public string Email { get; set; } = string.Empty;
 }

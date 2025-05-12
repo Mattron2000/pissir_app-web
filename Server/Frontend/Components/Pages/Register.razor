@@ -2,6 +2,7 @@
 @rendermode InteractiveWebAssembly
 
 @using FluentValidation
+@using Shared.DTOs.User
 @using Shared.FluentValidators
 
 @inject HttpClient Http
@@ -92,7 +93,7 @@
             StatusCode = "";
         }
 
-        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/register", registerUser);
+        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/users/register", registerUser);
 
         StatusValidation = response.IsSuccessStatusCode;
         StatusCode = response.StatusCode + "";
@@ -100,6 +101,6 @@
         if (StatusValidation)
             Reason = "User registered successfully";
         else
-            Reason = response.Content.ReadFromJsonAsync<UserMessageDTO>().Result?.Message ?? "Unknown error";
+            Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "Unknown error";
     }
 }

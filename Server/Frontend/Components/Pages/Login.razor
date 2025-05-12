@@ -3,6 +3,7 @@
 
 @using FluentValidation
 @using Frontend.States
+@using Shared.DTOs.User
 @using Shared.FluentValidators;
 
 @inject HttpClient Http
@@ -91,7 +92,7 @@
             return;
         }
 
-        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/login", loginUser);
+        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/users/login", loginUser);
 
         StatusValidation = response.IsSuccessStatusCode;
         StatusCode = response.StatusCode + "";
@@ -103,6 +104,6 @@
             return;
         }
 
-        Reason = response.Content.ReadFromJsonAsync<UserMessageDTO>().Result?.Message ?? "Unknown error";
+        Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "Unknown error";
     }
 }
