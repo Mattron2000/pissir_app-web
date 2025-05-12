@@ -92,9 +92,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
-builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
-builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidator>();
+builder.Services.AddScoped<AdminService>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -105,10 +104,14 @@ builder.Services.AddScoped<ISlotRepository, SlotRepository>();
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
-builder.Services.AddSingleton<AuthState>();
-builder.Services.AddSingleton<AuthStateNotifier>();
+builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
+builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
+builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidator>();
 
 builder.Services.AddSingleton<EmailValidator>();
+
+builder.Services.AddSingleton<AuthState>();
+builder.Services.AddSingleton<AuthStateNotifier>();
 
 WebApplication app = builder.Build();
 

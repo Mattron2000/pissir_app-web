@@ -36,13 +36,13 @@ public class SlotResponse
         };
 }
 
-public class SlotService(ISlotRepository repository)
+public class SlotService(ISlotRepository slotRepository)
 {
-    private readonly ISlotRepository _repository = repository;
+    private readonly ISlotRepository _slotRepository = slotRepository;
 
     internal async Task<SlotResponse> GetSlotsAsync()
     {
-        Slot[]? Slots = await _repository.GetSlotsAsync();
+        Slot[]? Slots = await _slotRepository.GetSlotsAsync();
 
         if (Slots == null)
             return SlotResponse.Failed();

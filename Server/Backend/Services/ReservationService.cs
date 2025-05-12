@@ -40,7 +40,7 @@ public class ReservationService(IReservationRepository repository)
 {
     private readonly IReservationRepository _repository = repository;
 
-    internal async Task<ReservationResponse> CreateReservationAsync(ReservationCreateDTO reservation)
+    internal Task<ReservationResponse> CreateReservationAsync(ReservationCreateDTO reservation)
     {
         throw new NotImplementedException();
     }

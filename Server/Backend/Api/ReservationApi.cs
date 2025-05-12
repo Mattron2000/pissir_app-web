@@ -23,7 +23,19 @@ public class ReservationApi : IApiEndpoint
         reservationApi.MapGet("/{email}", GetUserReservations);
     }
 
-    private async Task<Results<BadRequest<MessageDTO>, BadRequest<MessagesDTO>, NotFound<MessageDTO>, Created<ReservationEntityDTO>, ProblemHttpResult>> CreateReservation(ReservationCreateDTO reservation, UserService userService, ReservationService reservationService, IValidator<ReservationCreateDTO> validator)
+    private async Task<
+        Results<
+            BadRequest<MessageDTO>,
+            BadRequest<MessagesDTO>,
+            NotFound<MessageDTO>,
+            Created<ReservationEntityDTO>,
+            ProblemHttpResult
+        >
+    > CreateReservation(
+        ReservationCreateDTO reservation,
+        UserService userService,
+        ReservationService reservationService,
+        IValidator<ReservationCreateDTO> validator)
     {
         if (reservation == null)
             return TypedResults.BadRequest(new MessageDTO("Reservation body is null"));
@@ -79,7 +91,18 @@ public class ReservationApi : IApiEndpoint
         );
     }
 
-    private async Task<Results<BadRequest<MessagesDTO>, NotFound<MessageDTO>, ProblemHttpResult, Ok<ReservationEntityDTO[]>>> GetUserReservations(string email, UserService userService, ReservationService reservationService, EmailValidator validator)
+    private async Task<
+        Results<
+            BadRequest<MessagesDTO>,
+            NotFound<MessageDTO>,
+            ProblemHttpResult,
+            Ok<ReservationEntityDTO[]>
+        >
+    > GetUserReservations(
+        string email,
+        UserService userService,
+        ReservationService reservationService,
+        EmailValidator validator)
     {
         var result = await validator.ValidateAsync(email);
 

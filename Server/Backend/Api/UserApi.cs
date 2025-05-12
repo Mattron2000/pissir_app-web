@@ -23,7 +23,17 @@ public class UserApi : IApiEndpoint
         userApi.MapPatch("/{email}/type", SwitchUserType);
     }
 
-    private async Task<Results<Created<UserEntityDTO>, Conflict<MessageDTO>, BadRequest<MessagesDTO>, ProblemHttpResult>> Register(UserRegisterDTO userDto, UserService service, IValidator<UserRegisterDTO> validator)
+    private async Task<
+        Results<
+            Created<UserEntityDTO>,
+            Conflict<MessageDTO>,
+            BadRequest<MessagesDTO>,
+            ProblemHttpResult
+        >
+    > Register(
+        UserRegisterDTO userDto,
+        UserService service,
+        IValidator<UserRegisterDTO> validator)
     {
         var result = await validator.ValidateAsync(userDto);
         if (!result.IsValid)
@@ -56,7 +66,17 @@ public class UserApi : IApiEndpoint
         );
     }
 
-    private async Task<Results<Ok<UserEntityDTO>, NotFound<MessageDTO>, BadRequest<MessagesDTO>, ProblemHttpResult>> Login(UserLoginDTO userDto, UserService service, IValidator<UserLoginDTO> validator)
+    private async Task<
+        Results<
+            Ok<UserEntityDTO>,
+            NotFound<MessageDTO>,
+            BadRequest<MessagesDTO>,
+            ProblemHttpResult
+        >
+    > Login(
+        UserLoginDTO userDto,
+        UserService service,
+        IValidator<UserLoginDTO> validator)
     {
         var result = await validator.ValidateAsync(userDto);
 
@@ -90,7 +110,17 @@ public class UserApi : IApiEndpoint
         );
     }
 
-    private async Task<Results<Ok<UserEntityDTO>, NotFound<MessageDTO>, BadRequest<MessagesDTO>, ProblemHttpResult>> SwitchUserType(string email, UserService service, EmailValidator validator)
+    private async Task<
+        Results<
+            Ok<UserEntityDTO>,
+            NotFound<MessageDTO>,
+            BadRequest<MessagesDTO>,
+            ProblemHttpResult
+        >
+    > SwitchUserType(
+        string email,
+        UserService service,
+        EmailValidator validator)
     {
         var result = await validator.ValidateAsync(email);
 

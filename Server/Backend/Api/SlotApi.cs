@@ -19,7 +19,12 @@ public class SlotApi : IApiEndpoint
         slotApi.MapGet("/", GetSlots);
     }
 
-    private async Task<Results<Ok<SlotEntityDTO[]>, ProblemHttpResult>> GetSlots(SlotService service)
+    private async Task<
+        Results<
+            Ok<SlotEntityDTO[]>,
+            ProblemHttpResult
+        >
+    > GetSlots(SlotService service)
     {
         SlotResponse response = await service.GetSlotsAsync();
 
