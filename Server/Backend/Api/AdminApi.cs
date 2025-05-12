@@ -1,4 +1,5 @@
 using Backend.Models;
+using Backend.Services;
 
 namespace Backend.Api;
 
@@ -29,7 +30,7 @@ public class AdminApi : IApiEndpoint
         ) => SearchHistory);
 
         adminApi.MapGet("/prices", () => GetPrices);
-        adminApi.MapPut("/prices", (
+        adminApi.MapPatch("/prices", (
             PricesTypeEnum type,
             float price
         ) => SetPrice);
@@ -41,17 +42,21 @@ public class AdminApi : IApiEndpoint
         TimeOnly? time_start,
         TimeOnly? time_end,
         UserTypeEnum? user_type,
-        PricesTypeEnum? service_type)
+        PricesTypeEnum? service_type,
+        AdminService service)
     {
         throw new NotImplementedException();
     }
 
-    private Task<IResult> GetPrices()
+    private Task<IResult> GetPrices(AdminService service)
     {
         throw new NotImplementedException();
     }
 
-    private Task<IResult> SetPrice(PricesTypeEnum type, float price)
+    private Task<IResult> SetPrice(
+        PricesTypeEnum type,
+        float price,
+        AdminService service)
     {
         throw new NotImplementedException();
     }

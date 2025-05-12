@@ -95,6 +95,9 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
+builder.Services.AddScoped<FineService>();
+builder.Services.AddScoped<IFineRepository, FineRepository>();
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
