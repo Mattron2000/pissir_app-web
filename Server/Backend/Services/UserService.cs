@@ -1,6 +1,5 @@
 using Backend.Models;
-using Backend.Repositories;
-using FluentValidation;
+using Backend.Repositories.Interfaces;
 using Shared.DTOs.User;
 
 namespace Backend.Services;

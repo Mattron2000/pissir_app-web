@@ -1,6 +1,6 @@
 
 using Backend.Models;
-using Backend.Repositories;
+using Backend.Repositories.Interfaces;
 using Shared.DTOs.Reservation;
 
 namespace Backend.Services;

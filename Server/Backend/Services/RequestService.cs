@@ -1,4 +1,4 @@
-using Backend.Repositories;
+using Backend.Repositories.Interfaces;
 
 namespace Backend.Services;
 

@@ -2,6 +2,7 @@ using Backend.Api;
 using Backend.Components;
 using Backend.Data;
 using Backend.Repositories;
+using Backend.Repositories.Interfaces;
 using Backend.Services;
 using Backend.Swagger;
 using FluentValidation;
@@ -115,6 +116,7 @@ builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
 builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidator>();
 
 builder.Services.AddSingleton<EmailValidator>();
+builder.Services.AddSingleton<PriceValidator>();
 
 builder.Services.AddSingleton<AuthState>();
 builder.Services.AddSingleton<AuthStateNotifier>();
