@@ -6,4 +6,5 @@ public interface IAdminRepository
 {
     Task<Price[]> GetPricesAsync();
     Task<Price?> SetPriceAsync(string type, decimal amount);
+    Task<Request[]> GetRequestHistoryAsync();
 }

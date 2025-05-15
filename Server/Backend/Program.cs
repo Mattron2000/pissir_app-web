@@ -117,6 +117,10 @@ builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidato
 
 builder.Services.AddSingleton<EmailValidator>();
 builder.Services.AddSingleton<PriceValidator>();
+builder.Services.AddSingleton<PriceTypeValidator>();
+builder.Services.AddSingleton<UserTypeValidator>();
+builder.Services.AddSingleton<DateValidator>();
+builder.Services.AddSingleton<TimeValidator>();
 
 builder.Services.AddSingleton<AuthState>();
 builder.Services.AddSingleton<AuthStateNotifier>();

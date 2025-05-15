@@ -27,4 +27,9 @@ public class AdminRepository(SmartParkingContext context) : IAdminRepository
 
         return null;
     }
+
+    public async Task<Request[]> GetRequestHistoryAsync()
+    {
+        return await _context.Requests.ToArrayAsync();
+    }
 }

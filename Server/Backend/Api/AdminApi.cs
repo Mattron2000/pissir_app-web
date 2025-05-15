@@ -27,14 +27,7 @@ public class AdminApi : IApiEndpoint
         adminApi.MapGet("/prices", GetPrices);
         adminApi.MapPatch("/prices", SetPrice);
 
-        // adminApi.MapGet("/history", (
-        //     DateOnly? date_start,
-        //     DateOnly? date_end,
-        //     TimeOnly? time_start,
-        //     TimeOnly? time_end,
-        //     UserTypeEnum? user_type,
-        //     PricesTypeEnum? service_type
-        // ) => SearchHistory);
+        adminApi.MapGet("/history", SearchHistory);
     }
 
     private async Task<Results<Ok<PriceDataDTO[]>, ProblemHttpResult>> GetPrices(AdminService service)
@@ -53,15 +46,17 @@ public class AdminApi : IApiEndpoint
     private async Task<Results<Ok<PriceDataDTO>,BadRequest<MessagesDTO>, ProblemHttpResult>> SetPrice(
         string type,
         decimal price,
-        AdminService service, PriceValidator validator)
+        AdminService service, PriceValidator priceValidator, PriceTypeValidator priceTypeValidator)
     {
-        var result = await validator.ValidateAsync(price);
+        var result = await priceValidator.ValidateAsync(price);
 
         if (!result.IsValid)
             return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
 
-        if (type != "PARKING" && type != "CHARGING")
-            return TypedResults.BadRequest(new MessagesDTO(["Type must be PARKING or CHARGING"]));
+        result = await priceTypeValidator.ValidateAsync(type);
+
+        if (!result.IsValid)
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
 
         AdminResponse response = await service.SetPriceAsync(type, price);
 
@@ -81,15 +76,97 @@ public class AdminApi : IApiEndpoint
         );
     }
 
-    private Task<IResult> SearchHistory(
-        DateOnly? date_start,
-        DateOnly? date_end,
-        TimeOnly? time_start,
-        TimeOnly? time_end,
-        UserTypeEnum? user_type,
-        PricesTypeEnum? service_type,
-        AdminService service)
+    private async Task<IResult> SearchHistory(
+        string? date_start,
+        string? date_end,
+        string? time_start,
+        string? time_end,
+        string? user_type,
+        string? service_type,
+        AdminService service,
+        DateValidator dateValidator,
+        TimeValidator timeValidator,
+        UserTypeValidator userTypeValidator,
+        PriceTypeValidator serviceTypeValidator)
     {
-        throw new NotImplementedException();
+        List<string> messages = [];
+
+        if (date_start != null)
+        {
+            var result = await dateValidator.ValidateAsync(date_start);
+
+            if (!result.IsValid)
+                messages.AddRange([.. result.Errors.Select(e => e.ErrorMessage)]);
+        }
+
+        if (date_end != null)
+        {
+            var result = await dateValidator.ValidateAsync(date_end);
+
+            if (!result.IsValid)
+                messages.AddRange([.. result.Errors.Select(e => e.ErrorMessage)]);
+        }
+
+        if (time_start != null)
+        {
+            var result = await timeValidator.ValidateAsync(time_start);
+
+            if (!result.IsValid)
+                messages.AddRange([.. result.Errors.Select(e => e.ErrorMessage)]);
+        }
+
+        if (time_end != null)
+        {
+            var result = await timeValidator.ValidateAsync(time_end);
+
+            if (!result.IsValid)
+                messages.AddRange([.. result.Errors.Select(e => e.ErrorMessage)]);
+        }
+
+        if (user_type != null)
+        {
+            var result = await userTypeValidator.ValidateAsync(user_type);
+
+            if (!result.IsValid)
+                messages.AddRange([.. result.Errors.Select(e => e.ErrorMessage)]);
+        }
+
+        if (service_type != null)
+        {
+            var result = await serviceTypeValidator.ValidateAsync(service_type);
+
+            if (!result.IsValid)
+                messages.AddRange([.. result.Errors.Select(e => e.ErrorMessage)]);
+        }
+
+        if (date_start == null && date_end != null || date_start != null && date_end == null)
+            messages.Add("Both start and end dates must be provided or omitted together.");
+
+        if (date_start != null && date_end != null && DateTime.Parse(date_start) > DateTime.Parse(date_end))
+            messages.Add("Start date must be before end date.");
+
+        if (time_start != null && time_end != null && DateTime.Parse(time_start) > DateTime.Parse(time_end))
+            messages.Add("Start time must be before end time.");
+
+        if(messages.Count > 0)
+            return TypedResults.BadRequest(new MessagesDTO([.. messages]));
+
+        AdminResponse response = await service.SearchHistoryAsync(
+            date_start,
+            date_end,
+            time_start,
+            time_end,
+            user_type,
+            service_type
+        );
+
+        if (response.Result == AdminResultEnum.Success && response.History != null)
+            return TypedResults.Ok(response.History);
+
+        return TypedResults.Problem(
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "Search History Failed",
+            detail: response.ErrorMessage
+        );
     }
 }
