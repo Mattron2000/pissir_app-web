@@ -10,6 +10,7 @@ using Frontend.States;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Shared.DTOs.Fine;
 using Shared.DTOs.Reservation;
 using Shared.DTOs.User;
 using Shared.FluentValidators;
@@ -114,6 +115,7 @@ builder.Services.AddScoped<ISlotRepository, SlotRepository>();
 builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
 builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
 builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidator>();
+builder.Services.AddScoped<IValidator<FineNewDTO>, FineCreationValidator>();
 
 builder.Services.AddSingleton<EmailValidator>();
 builder.Services.AddSingleton<PriceValidator>();
@@ -121,6 +123,7 @@ builder.Services.AddSingleton<PriceTypeValidator>();
 builder.Services.AddSingleton<UserTypeValidator>();
 builder.Services.AddSingleton<DateValidator>();
 builder.Services.AddSingleton<TimeValidator>();
+builder.Services.AddSingleton<DateTimeValidator>();
 
 builder.Services.AddSingleton<AuthState>();
 builder.Services.AddSingleton<AuthStateNotifier>();
