@@ -1,26 +1,28 @@
 using Backend.Repositories.Interfaces;
+using Shared.DTOs.Request;
 
 namespace Backend.Services;
 
 public enum RequestResultEnum
 {
     Success,
-    Failed
+    Failed,
+    UserNotFound
 }
 
 public class RequestResponse
 {
     public RequestResultEnum Result { get; init; }
-    // public RequestEntityDTO? Request { get; init; }
     public string? ErrorMessage { get; init; }
+    public RequestDTO[]? Requests { get; init; }
 
     public static RequestResponse Success(
-        // RequestEntityDTO Request
+        RequestDTO[] requests
         ) =>
         new()
         {
-            Result = RequestResultEnum.Success //,
-            // Request = Request
+            Result = RequestResultEnum.Success,
+            Requests = requests
         };
 
     public static RequestResponse Failed(RequestResultEnum result = RequestResultEnum.Failed, string? reason = null) =>
@@ -29,20 +31,61 @@ public class RequestResponse
             Result = result,
             ErrorMessage = reason ?? result switch
             {
-                // RequestResultEnum.RequestAlreadyExists => "Request already exists",
-                // RequestResultEnum.RequestNotFound => "Request not found",
-                // RequestResultEnum.Forbid => "Forbidden",
+                RequestResultEnum.UserNotFound => "User not found",
                 _ => null
             }
         };
 }
 
-public class RequestService(IRequestRepository repository)
+public class RequestService(IRequestRepository requestRepository, IUserRepository userRepository)
 {
-    private readonly IRequestRepository _repository = repository;
+    private readonly IRequestRepository _requestRepository = requestRepository;
+    private readonly IUserRepository _userRepository = userRepository;
 
-    internal Task<RequestResponse> MethodExample()
+    internal async Task<RequestResponse> GetRequestAsync(string email, bool? paid)
     {
-        throw new NotImplementedException();
+        var user = await _userRepository.GetUserByEmailAsync(email);
+
+        if (user == null)
+            return RequestResponse.Failed(RequestResultEnum.UserNotFound);
+
+        var requests = await _requestRepository.GetRequestsAsync(email);
+
+        if (requests == null)
+            return RequestResponse.Failed();
+
+        if (paid != null)
+            requests = [.. requests.Where(r => r.Paid == paid)];
+
+        return RequestResponse.Success([.. requests.Select(r => new RequestDTO(
+            r.Email,
+            r.DatetimeStart.ToString(),
+            r.DatetimeEnd.ToString(),
+            r.Kw,
+            r.Paid,
+            r.SlotId
+        ))]);
+    }
+
+    internal async Task<RequestResponse> UpdateRequestAsync(string email)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email);
+
+        if (user == null)
+            return RequestResponse.Failed(RequestResultEnum.UserNotFound);
+
+        var requests = await _requestRepository.UpdateRequestsAsync(email);
+
+        if (requests == null)
+            return RequestResponse.Success([]);
+
+        return RequestResponse.Success([.. requests.Select(r => new RequestDTO(
+            r.Email,
+            r.DatetimeStart.ToString(),
+            r.DatetimeEnd.ToString(),
+            r.Kw,
+            r.Paid,
+            r.SlotId
+        ))]);
     }
 }

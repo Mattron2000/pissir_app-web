@@ -1,4 +1,8 @@
 using Backend.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Shared.DTOs;
+using Shared.DTOs.Request;
+using Shared.FluentValidators.Properties;
 
 namespace Backend.Api;
 
@@ -13,20 +17,82 @@ public class RequestApi : IApiEndpoint
 
     private void MapV1(RouteGroupBuilder adminApi)
     {
-        adminApi.MapGet("/{email}", (
-            string email,
-            bool? paid
-        ) => GetUserRequest);
+        adminApi.MapGet("/{email}", GetUserRequest);
         adminApi.MapPatch("/{email}", UpdateUserRequest);
     }
 
-    private Task GetUserRequest(string email, bool? paid, RequestService service)
+    private async Task<
+        Results<
+            BadRequest<MessagesDTO>,
+            NotFound<MessageDTO>,
+            ProblemHttpResult,
+            Ok<RequestDTO[]>
+        >
+    > GetUserRequest(
+        string email,
+        bool? paid,
+        RequestService service,
+        EmailValidator validator)
     {
-        throw new NotImplementedException();
+        var result = await validator.ValidateAsync(email);
+
+        if (!result.IsValid)
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+
+        RequestResponse response = await service.GetRequestAsync(email, paid);
+
+        if (response == null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "User Request Failed: request response is null"
+            );
+
+        if (response.Result == RequestResultEnum.Success && response.Requests != null)
+            return TypedResults.Ok(response.Requests);
+
+        if (response.Result == RequestResultEnum.UserNotFound && response.ErrorMessage != null)
+            return TypedResults.NotFound(new MessageDTO(response.ErrorMessage));
+
+        return TypedResults.Problem(
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "User Request Failed"
+        );
     }
 
-    private Task UpdateUserRequest(string email, RequestService service)
+    private async Task<
+        Results<
+            Ok<RequestDTO[]>,
+            NotFound<MessageDTO>,
+            BadRequest<MessagesDTO>,
+            ProblemHttpResult
+        >
+    > UpdateUserRequest(
+        string email,
+        RequestService service,
+        EmailValidator validator)
     {
-        throw new NotImplementedException();
+        var result = await validator.ValidateAsync(email);
+
+        if (!result.IsValid)
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+
+        RequestResponse response = await service.UpdateRequestAsync(email);
+
+        if (response == null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "User Request Update Failed: request response is null"
+            );
+
+        if (response.Result == RequestResultEnum.Success && response.Requests != null)
+            return TypedResults.Ok(response.Requests);
+
+        if (response.Result == RequestResultEnum.UserNotFound && response.ErrorMessage != null)
+            return TypedResults.NotFound(new MessageDTO(response.ErrorMessage));
+
+        return TypedResults.Problem(
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "User Request Update Failed"
+        );
     }
 }
