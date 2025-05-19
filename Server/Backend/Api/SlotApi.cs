@@ -24,7 +24,7 @@ public class SlotApi : IApiEndpoint
             Ok<SlotEntityDTO[]>,
             ProblemHttpResult
         >
-    > GetSlots(SlotService service)
+    > GetSlots(SlotsStatusEnum? status, SlotService service)
     {
         SlotResponse response = await service.GetSlotsAsync();
 
@@ -35,7 +35,12 @@ public class SlotApi : IApiEndpoint
             );
 
         if (response.Result == SlotResultEnum.Success && response.Slots != null)
+        {
+            if (status != null)
+                response.Slots = [.. response.Slots.Where(s => s.Status == status.ToString())];
+
             return TypedResults.Ok(response.Slots);
+        }
 
         if (response.Result == SlotResultEnum.Failed && response.ErrorMessage != null)
             return TypedResults.Problem(
