@@ -101,6 +101,8 @@
         {
             Reason = "User logged in successfully";
             AuthState.SetUser(response.Content.ReadFromJsonAsync<UserEntityDTO>().Result);
+            AuthStateNotifier.Notify();
+
             return;
         }
 

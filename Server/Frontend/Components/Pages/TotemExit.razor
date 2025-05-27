@@ -1,0 +1,42 @@
+@page "/pages/totem/exit"
+@rendermode InteractiveWebAssembly
+
+@using Frontend.States
+
+@inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
+
+<PageTitle>@Title</PageTitle>
+
+@if (!OperatingSystem.IsBrowser())
+{
+    <LoadingSpinner Name="@(Title + " WebAssembly")" />
+    return;
+}
+
+<h3>@Title</h3>
+
+@if (AuthState.User == null)
+{
+    <Login />
+    return;
+}
+
+<div class="alert alert-success d-flex max-width-item">
+    <span class="bi bi-check-circle-fill"></span>
+    <strong class="me-2">Success</strong> You are logged in as @AuthState.User.Surname @AuthState.User.Name
+</div>
+
+@code {
+    private readonly string Title = "Totem Exit";
+
+    protected override void OnInitialized()
+    {
+        AuthStateNotifier.Subscribe(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthStateNotifier.Unsubscribe(StateHasChanged);
+    }
+}
