@@ -18,17 +18,24 @@
 
 @if (AuthState.User == null)
 {
+    ResetState();
     <Login />
     return;
 }
 
-<div class="alert alert-success d-flex max-width-item">
-    <span class="bi bi-check-circle-fill"></span>
-    <strong class="me-2">Success</strong> You are logged in as @AuthState.User.Surname @AuthState.User.Name
-</div>
+<SelectServiceType OnClickCallback="HandleSelectServiceSubmit" />
+
+@if (SelectedServiceType == null)
+{
+    return;
+}
+
+<p>@SelectedServiceType</p>
 
 @code {
     private readonly string Title = "Totem Entrance";
+
+    private string? SelectedServiceType { get; set; }
 
     protected override void OnInitialized()
     {
@@ -38,5 +45,19 @@
     public void Dispose()
     {
         AuthStateNotifier.Unsubscribe(StateHasChanged);
+    }
+
+    private void HandleSelectServiceSubmit(string selectedServiceType)
+    {
+        if (selectedServiceType == null ||
+            (selectedServiceType != "PARKING" && selectedServiceType != "CHARGING"))
+            return;
+
+        SelectedServiceType = selectedServiceType;
+    }
+
+    private void ResetState()
+    {
+        SelectedServiceType = null;
     }
 }
