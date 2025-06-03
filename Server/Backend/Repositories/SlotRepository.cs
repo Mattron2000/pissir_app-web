@@ -9,7 +9,7 @@ public class SlotRepository(SmartParkingContext context) : ISlotRepository
 {
     private readonly SmartParkingContext _context = context;
 
-    public async Task<Slot[]?> GetSlotsAsync()
+    public async Task<Slot[]> GetSlotsAsync()
     {
         return await _context.Slots.ToArrayAsync();
     }

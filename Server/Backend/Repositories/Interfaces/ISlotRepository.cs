@@ -4,5 +4,5 @@ namespace Backend.Repositories.Interfaces;
 
 public interface ISlotRepository
 {
-    Task<Slot[]?> GetSlotsAsync();
+    Task<Slot[]> GetSlotsAsync();
 }

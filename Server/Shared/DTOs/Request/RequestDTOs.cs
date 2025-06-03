@@ -8,3 +8,10 @@ public record RequestDTO(
     bool? Paid,
     int SlotId
 );
+
+public record NewRequestDTO(
+    string Email,
+    string DatetimeEnd,
+    int? Percentage,
+    string? PhoneNumber
+);

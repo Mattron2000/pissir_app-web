@@ -1,3 +1,4 @@
+using Backend.Models;
 using Backend.Repositories.Interfaces;
 using Shared.DTOs.Request;
 
@@ -7,7 +8,8 @@ public enum RequestResultEnum
 {
     Success,
     Failed,
-    UserNotFound
+    UserNotFound,
+    RequestAlreadyExists
 }
 
 public class RequestResponse
@@ -32,15 +34,18 @@ public class RequestResponse
             ErrorMessage = reason ?? result switch
             {
                 RequestResultEnum.UserNotFound => "User not found",
+                RequestResultEnum.RequestAlreadyExists => "Request already exists",
+                RequestResultEnum.Failed => "Failed",
                 _ => null
             }
         };
 }
 
-public class RequestService(IRequestRepository requestRepository, IUserRepository userRepository)
+public class RequestService(IRequestRepository requestRepository, IUserRepository userRepository, ISlotRepository slotRepository)
 {
     private readonly IRequestRepository _requestRepository = requestRepository;
     private readonly IUserRepository _userRepository = userRepository;
+    private readonly ISlotRepository _slotRepository = slotRepository;
 
     internal async Task<RequestResponse> GetRequestAsync(string email, bool? paid)
     {
@@ -87,5 +92,39 @@ public class RequestService(IRequestRepository requestRepository, IUserRepositor
             r.Paid,
             r.SlotId
         ))]);
+    }
+
+    internal async Task<RequestResponse> AddRequestAsync(NewRequestDTO requestDto)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(requestDto.Email);
+
+        if (user == null)
+            return RequestResponse.Failed(RequestResultEnum.UserNotFound);
+
+        var requests = await _requestRepository.GetRequestsAsync(requestDto.Email);
+
+        if (requests != null && requests.Length > 0)
+            if (requests.Any(r => r.Paid == false))
+                return RequestResponse.Failed(RequestResultEnum.RequestAlreadyExists, "Existing request not paid");
+
+        Slot[] slots = await _slotRepository.GetSlotsAsync();
+
+        slots = [.. slots.Where(s => s.Status == SlotsStatusEnum.FREE.ToString())];
+
+        if (slots.Length == 0)
+            return RequestResponse.Failed(RequestResultEnum.Failed, "No free slots");
+
+        Slot selectedSlot = slots[new Random().Next(slots.Length)];
+
+        Request request = await _requestRepository.AddRequestAsync(requestDto, selectedSlot.Id);
+
+        return RequestResponse.Success([new RequestDTO(
+            request.Email,
+            request.DatetimeStart.ToString(),
+            request.DatetimeEnd.ToString(),
+            request.Kw,
+            request.Paid,
+            request.SlotId
+        )]);
     }
 }

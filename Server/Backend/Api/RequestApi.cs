@@ -1,4 +1,5 @@
 using Backend.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Shared.DTOs;
 using Shared.DTOs.Request;
@@ -19,6 +20,7 @@ public class RequestApi : IApiEndpoint
     {
         adminApi.MapGet("/{email}", GetUserRequest);
         adminApi.MapPatch("/{email}", UpdateUserRequest);
+        adminApi.MapPost("/", AddRequest);
     }
 
     private async Task<
@@ -94,5 +96,48 @@ public class RequestApi : IApiEndpoint
             statusCode: StatusCodes.Status500InternalServerError,
             title: "User Request Update Failed"
         );
+    }
+
+    private async Task<
+        Results<
+            Ok<RequestDTO>,
+            NotFound<MessageDTO>,
+            BadRequest<MessagesDTO>,
+            Conflict<MessageDTO>,
+            ProblemHttpResult
+        >
+    > AddRequest(
+        NewRequestDTO requestDto,
+        RequestService service,
+        IValidator<NewRequestDTO> validator)
+    {
+        var result = await validator.ValidateAsync(requestDto);
+
+        if (!result.IsValid)
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+
+        RequestResponse response = await service.AddRequestAsync(requestDto);
+
+        if (response == null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Add Request Failed: request response is null"
+            );
+
+        if (response.Result == RequestResultEnum.UserNotFound && response.ErrorMessage != null)
+            return TypedResults.NotFound(new MessageDTO(response.ErrorMessage));
+
+        if (response.Result == RequestResultEnum.RequestAlreadyExists && response.ErrorMessage != null)
+            return TypedResults.Conflict(new MessageDTO(response.ErrorMessage));
+
+        if (!(response.Result == RequestResultEnum.Success && response.Requests != null && response.Requests.Length == 1))
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Add Request Failed"
+            );
+
+        // TODO: send mqtt message to broker [int? Percentage, string? PhoneNumber]
+
+        return TypedResults.Ok(response.Requests[0]);
     }
 }

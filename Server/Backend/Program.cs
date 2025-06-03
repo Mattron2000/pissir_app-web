@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Shared.DTOs.Fine;
+using Shared.DTOs.Request;
 using Shared.DTOs.Reservation;
 using Shared.DTOs.User;
 using Shared.FluentValidators;
@@ -116,6 +117,7 @@ builder.Services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>()
 builder.Services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>();
 builder.Services.AddScoped<IValidator<ReservationCreateDTO>, ReservationValidator>();
 builder.Services.AddScoped<IValidator<FineNewDTO>, FineCreationValidator>();
+builder.Services.AddScoped<IValidator<NewRequestDTO>, NewRequestValidator>();
 
 builder.Services.AddSingleton<EmailValidator>();
 builder.Services.AddSingleton<PriceValidator>();
