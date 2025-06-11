@@ -1,10 +1,8 @@
-@page "/pages/Login"
-@rendermode InteractiveWebAssembly
-
 @using FluentValidation
 @using Frontend.States
 @using Shared.DTOs.User
-@using Shared.FluentValidators;
+@using Shared.FluentValidators
+@using static Frontend.Components.ErrorBox
 
 @inject HttpClient Http
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
@@ -31,24 +29,9 @@
     return;
 }
 
-@if (!string.IsNullOrEmpty(Reason))
-{
-    <div class="alert alert-warning alert-dismissible d-flex max-width-item">
-        <span class="bi bi-exclamation-triangle-fill"></span>
-        <strong class="me-2">@StatusCode</strong> @Reason
-        <button type="button" class="btn-close" @onclick="() => Reason = string.Empty"></button>
-    </div>
-}
-
-@if (errors.Count > 0)
-{
-<ul class="text-danger mt-4">
-    @foreach (var error in errors)
-    {
-        <li>@error</li>
-    }
-</ul>
-}
+<CascadingValue Value="errorModel">
+    <ErrorBox OnClickCallback="ResetState" />
+</CascadingValue>
 
 <EditForm Model="@loginUser" OnSubmit="HandleLoginSubmit">
     <div class="mb-3 max-width-item">
@@ -66,46 +49,56 @@
 
 <br>
 
-<div>Don't have an account? <a href="/pages/Register">Register</a></div>
+<div>Don't have an account? <a class="text-decoration-underline text-primary" @onclick="() => OnClickCallback.InvokeAsync()">Register</a></div>
 
 @code {
+
+    [Parameter] public EventCallback OnClickCallback { get; set; }
+
     private readonly string Title = "Login";
     private UserLoginDTO loginUser = new();
-    private string Reason = string.Empty;
-    private string StatusCode = string.Empty;
-    private List<string> errors = new();
+    private ErrorBoxModel errorModel = new();
 
     private async Task HandleLoginSubmit()
     {
+        ResetState();
+
         var validator = new UserLoginValidator();
         var results = validator.Validate(loginUser);
 
         var StatusValidation = results.IsValid;
-        errors = results.Errors.Select(e => e.ErrorMessage).ToList();
+        errorModel.Errors = results.Errors.Select(e => e.ErrorMessage).ToList();
 
-        StatusCode = "";
-        Reason = string.Empty;
+        errorModel.StatusCode = "";
+        errorModel.Reason = string.Empty;
 
         if (!StatusValidation)
         {
-            Reason = "Please respect the validator suggestions";
+            errorModel.Reason = "Please respect the validator suggestions";
             return;
         }
 
         HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/users/login", loginUser);
 
         StatusValidation = response.IsSuccessStatusCode;
-        StatusCode = response.StatusCode + "";
+        errorModel.StatusCode = response.StatusCode + "";
 
         if (StatusValidation)
         {
-            Reason = "User logged in successfully";
+            errorModel.Reason = "User logged in successfully";
             AuthState.SetUser(response.Content.ReadFromJsonAsync<UserEntityDTO>().Result);
             AuthStateNotifier.Notify();
 
             return;
         }
 
-        Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "Unknown error";
+        errorModel.Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "Unknown error";
+    }
+
+    private void ResetState()
+    {
+        errorModel.Reason = string.Empty;
+        errorModel.StatusCode = string.Empty;
+        errorModel.Errors = new();
     }
 }

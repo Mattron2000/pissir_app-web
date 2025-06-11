@@ -100,7 +100,7 @@ public class RequestApi : IApiEndpoint
 
     private async Task<
         Results<
-            Ok<RequestDTO>,
+            Created<RequestDTO>,
             NotFound<MessageDTO>,
             BadRequest<MessagesDTO>,
             Conflict<MessageDTO>,
@@ -138,6 +138,6 @@ public class RequestApi : IApiEndpoint
 
         // TODO: send mqtt message to broker [int? Percentage, string? PhoneNumber]
 
-        return TypedResults.Ok(response.Requests[0]);
+        return TypedResults.Created("/api/v1/requests", response.Requests[0]);
     }
 }

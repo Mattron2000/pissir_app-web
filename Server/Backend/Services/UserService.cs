@@ -49,7 +49,10 @@ public class UserService(IUserRepository repository)
         if (await _repository.GetUserByEmailAsync(userDto.Email) != null)
             return UserResponse.Failed(UserResultEnum.UserAlreadyExists);
 
-        await _repository.InsertUserAsync(userDto.Email, userDto.Password, userDto.Name, userDto.Surname);
+        bool success = await _repository.InsertUserAsync(userDto.Email, userDto.Password, userDto.Name, userDto.Surname);
+
+        if (!success)
+            return UserResponse.Failed(UserResultEnum.Failed);
 
         return UserResponse.Success(
             new UserEntityDTO(

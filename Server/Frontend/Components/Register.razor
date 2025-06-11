@@ -1,13 +1,14 @@
-@page "/pages/Register"
-@rendermode InteractiveWebAssembly
-
 @using FluentValidation
+@using Frontend.States
 @using Shared.DTOs.User
 @using Shared.FluentValidators
+@using static Frontend.Components.ErrorBox
 
 @inject HttpClient Http
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
 @inject IValidator<UserRegisterDTO> Validator
+@inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
 
 <PageTitle>@Title</PageTitle>
 
@@ -19,24 +20,18 @@
 
 <h3>User Registration</h3>
 
-@if (!string.IsNullOrEmpty(Reason))
+@if (AuthState.User != null)
 {
-    <div class="alert alert-@(StatusValidation ? "success" : "warning") alert-dismissible d-flex max-width-item">
-        <span class="bi @(StatusValidation ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill")"></span>
-        <strong class="me-2">@StatusCode</strong> @Reason
-        <button type="button" class="btn-close" @onclick="() => Reason = string.Empty"></button>
+    <div class="alert alert-success d-flex max-width-item">
+        <span class="bi bi-check-circle-fill"></span>
+        <strong class="me-2">Success</strong> You are logged in as @AuthState.User.Surname @AuthState.User.Name
     </div>
+    return;
 }
 
-@if (errors.Count > 0)
-{
-<ul class="text-danger mt-4">
-    @foreach (var error in errors)
-    {
-        <li>@error</li>
-    }
-</ul>
-}
+<CascadingValue Value="errorModel">
+    <ErrorBox OnClickCallback="ResetState" />
+</CascadingValue>
 
 <EditForm Model="@registerUser" OnSubmit="HandleRegisterSubmit">
     <div class="mb-3 max-width-item">
@@ -64,43 +59,51 @@
 
 <br>
 
-<div>Already registered? <a href="@LoginPath">Login</a></div>
+<div>Already registered? <a class="text-decoration-underline text-primary" @onclick="() => OnClickCallback.InvokeAsync()">Login</a></div>
 
 @code {
+    [Parameter] public EventCallback OnClickCallback { get; set; }
+
     private readonly string Title = "Register";
-    private readonly string LoginPath = "/pages/Login";
     private UserRegisterDTO registerUser = new();
     private bool StatusValidation = false;
-    private string StatusCode = string.Empty;
-    private string Reason = string.Empty;
-    private List<string> errors = new();
+    private ErrorBoxModel errorModel = new();
 
     private async Task HandleRegisterSubmit()
     {
+        ResetState();
+
         var validator = new UserRegisterValidator();
         var results = validator.Validate(registerUser);
 
         StatusValidation = results.IsValid;
-        errors = results.Errors.Select(e => e.ErrorMessage).ToList();
-        Reason = string.Empty;
+        errorModel.Errors = results.Errors.Select(e => e.ErrorMessage).ToList();
+        errorModel.Reason = string.Empty;
 
         if (!StatusValidation)
         {
-            StatusCode = "";
-            Reason = "Please respect the validator suggestions";
+            errorModel.StatusCode = "";
+            errorModel.Reason = "Please respect the validator suggestions";
             return;
         } else {
-            StatusCode = "";
+            errorModel.StatusCode = "";
         }
 
         HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/users/register", registerUser);
 
         StatusValidation = response.IsSuccessStatusCode;
-        StatusCode = response.StatusCode + "";
+        errorModel.StatusCode = response.StatusCode + "";
 
         if (StatusValidation)
-            Reason = "User registered successfully";
+            errorModel.Reason = "User registered successfully";
         else
-            Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "Unknown error";
+            errorModel.Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "Unknown error";
+    }
+
+    private void ResetState()
+    {
+        errorModel.Reason = string.Empty;
+        errorModel.StatusCode = string.Empty;
+        errorModel.Errors = new();
     }
 }

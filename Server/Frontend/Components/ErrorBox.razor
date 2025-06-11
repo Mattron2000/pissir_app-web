@@ -1,0 +1,49 @@
+@namespace Frontend.Components
+
+@using FluentValidation
+@using Frontend.States
+@using Shared.DTOs.User
+@using Shared.FluentValidators
+
+@if (!string.IsNullOrEmpty(errorModel.Reason))
+{
+    @if (errorModel.StatusCode == "Created" || errorModel.StatusCode == "Success")
+    {
+        <div class="alert alert-success alert-dismissible d-flex max-width-item">
+            <span class="bi bi-check-circle-fill"></span>
+            <strong class="me-2">@errorModel.StatusCode</strong> @errorModel.Reason
+            <button type="button" class="btn-close" @onclick="OnClickCallback"></button>
+        </div>
+    } else {
+        <div class="alert alert-warning alert-dismissible d-flex max-width-item">
+            <span class="bi bi-exclamation-triangle-fill"></span>
+            <strong class="me-2">@errorModel.StatusCode</strong> @errorModel.Reason
+            <button type="button" class="btn-close" @onclick="OnClickCallback"></button>
+        </div>
+    }
+}
+
+@if (errorModel.Errors != null && errorModel.Errors.Count > 0)
+{
+<ul class="text-danger mt-4">
+    @foreach (var error in errorModel.Errors)
+    {
+        <li>@error</li>
+    }
+</ul>
+}
+
+@code {
+    public class ErrorBoxModel
+    {
+        public string Reason = string.Empty;
+        public string StatusCode = string.Empty;
+        public List<string> Errors = new();
+    }
+
+    [CascadingParameter]
+    public required ErrorBoxModel errorModel { get; set; }
+
+    [Parameter]
+    public EventCallback OnClickCallback { get; set; }
+}
