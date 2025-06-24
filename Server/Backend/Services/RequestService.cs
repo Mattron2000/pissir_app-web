@@ -127,4 +127,26 @@ public class RequestService(IRequestRepository requestRepository, IUserRepositor
             request.SlotId
         )]);
     }
+
+    internal async Task<RequestResponse> DeleteRequestAsync(string email, DateTime datetime_start)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email);
+
+        if (user == null)
+            return RequestResponse.Failed(RequestResultEnum.UserNotFound);
+
+        Request? request = await _requestRepository.DeleteRequestAsync(email, datetime_start);
+
+        if (request == null)
+            return RequestResponse.Failed();
+
+        return RequestResponse.Success([new RequestDTO(
+            request.Email,
+            request.DatetimeStart.ToString(),
+            request.DatetimeEnd.ToString(),
+            request.Kw,
+            request.Paid,
+            request.SlotId
+        )]);
+    }
 }

@@ -50,6 +50,10 @@ public partial class SmartParkingContext : DbContext
             entity.Property(e => e.DatetimeEnd)
                 .HasColumnType("DATETIME")
                 .HasColumnName("datetime_end");
+            entity.Property(e => e.Kw)
+                .HasDefaultValueSql("0")
+                .HasColumnType("INTEGER")
+                .HasColumnName("kw");
             entity.Property(e => e.Paid)
                 .HasDefaultValueSql("FALSE")
                 .HasColumnType("BOOLEAN")

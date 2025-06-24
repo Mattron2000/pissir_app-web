@@ -1,36 +1,18 @@
-@using FluentValidation
 @using Frontend.States
 @using Shared.DTOs.User
 @using Shared.FluentValidators
-@using static Frontend.Components.ErrorBox
+@using static Frontend.Components.MessageBox
 
-@inject HttpClient Http
-@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
-@inject IValidator<UserLoginDTO> Validator
 @inject AuthState AuthState
 @inject AuthStateNotifier AuthStateNotifier
+@inject HttpClient HttpClient
 
-<PageTitle>@Title</PageTitle>
-
-@if (!OperatingSystem.IsBrowser())
+@if (AuthState.User == null)
 {
-    <LoadingSpinner Name="@(Title + " WebAssembly")" />
-    return;
-}
-
-<h3>User Login</h3>
-
-@if (AuthState.User != null)
-{
-    <div class="alert alert-success d-flex max-width-item">
-        <span class="bi bi-check-circle-fill"></span>
-        <strong class="me-2">Success</strong> You are logged in as @AuthState.User.Surname @AuthState.User.Name
-    </div>
-    return;
-}
+<h3>@Title</h3>
 
 <CascadingValue Value="errorModel">
-    <ErrorBox OnClickCallback="ResetState" />
+    <MessageBox OnCloseCallBack="OnCloseMessageBox" />
 </CascadingValue>
 
 <EditForm Model="@loginUser" OnSubmit="HandleLoginSubmit">
@@ -46,59 +28,67 @@
 
     <button type="submit" class="btn btn-primary">Login</button>
 </EditForm>
-
-<br>
-
-<div>Don't have an account? <a class="text-decoration-underline text-primary" @onclick="() => OnClickCallback.InvokeAsync()">Register</a></div>
+}
 
 @code {
-
-    [Parameter] public EventCallback OnClickCallback { get; set; }
-
-    private readonly string Title = "Login";
+    [Parameter]
+    public EventCallback<bool> OnClickCallback { get; set; }
+    private MessageBoxModel errorModel = new();
     private UserLoginDTO loginUser = new();
-    private ErrorBoxModel errorModel = new();
+    private readonly string Title = "Login";
 
-    private async Task HandleLoginSubmit()
+
+    protected override void OnInitialized()
     {
-        ResetState();
+        AuthStateNotifier.Subscribe(StateHasChanged);
+        errorModel.Reset();
+    }
 
+    public void Dispose()
+    {
+        AuthStateNotifier.Unsubscribe(StateHasChanged);
+    }
+
+    private void OnCloseMessageBox()
+    {
+    }
+
+    private async void HandleLoginSubmit()
+    {
+        if (ValidateUserDataInput() == false)
+            return;
+
+        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/v1/users/login", loginUser);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            errorModel.Title = (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "Unknown error";
+            errorModel.Type = MessageType.Warning;
+            errorModel.IsVisible = true;
+            return;
+        }
+
+        AuthState.SetUser(await response.Content.ReadFromJsonAsync<UserEntityDTO>());
+        AuthStateNotifier.Notify();
+
+        await OnClickCallback.InvokeAsync(true);
+    }
+
+    private bool ValidateUserDataInput()
+    {
         var validator = new UserLoginValidator();
         var results = validator.Validate(loginUser);
 
         var StatusValidation = results.IsValid;
-        errorModel.Errors = results.Errors.Select(e => e.ErrorMessage).ToList();
-
-        errorModel.StatusCode = "";
-        errorModel.Reason = string.Empty;
+        errorModel.Reasons = results.Errors.Select(e => e.ErrorMessage).ToList();
 
         if (!StatusValidation)
         {
-            errorModel.Reason = "Please respect the validator suggestions";
-            return;
+            errorModel.Title = "Please respect the validator suggestions";
+            errorModel.Type = MessageType.Warning;
+            errorModel.IsVisible = true;
         }
 
-        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/users/login", loginUser);
-
-        StatusValidation = response.IsSuccessStatusCode;
-        errorModel.StatusCode = response.StatusCode + "";
-
-        if (StatusValidation)
-        {
-            errorModel.Reason = "User logged in successfully";
-            AuthState.SetUser(response.Content.ReadFromJsonAsync<UserEntityDTO>().Result);
-            AuthStateNotifier.Notify();
-
-            return;
-        }
-
-        errorModel.Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "Unknown error";
-    }
-
-    private void ResetState()
-    {
-        errorModel.Reason = string.Empty;
-        errorModel.StatusCode = string.Empty;
-        errorModel.Errors = new();
+        return StatusValidation;
     }
 }

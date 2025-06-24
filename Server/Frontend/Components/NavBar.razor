@@ -7,23 +7,16 @@
 @inject NavigationManager NavigationManager
 
 <nav class="navbar bg-body-tertiary px-3 justify-content-end top-row">
-    @if (AuthState.User == null)
+    @if (AuthState.User != null)
     {
-        @*
-        <a class="pe-2" href="/pages/Register">Register</a>
-        <a class="pe-2" href="/pages/Login">Login</a>
-        *@
-    }
-    else
-    {
-        <div class="dropdown me-2">
-            <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                @AuthState.User.Surname @AuthState.User.Name
-            </button>
-            <ul class="dropdown-menu">
-                <li><button class="dropdown-item" @onclick="Logout">Logout</button></li>
-            </ul>
-        </div>
+    <div class="dropdown me-2">
+        <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            @AuthState.User.Surname @AuthState.User.Name
+        </button>
+        <ul class="dropdown-menu">
+            <li><button class="dropdown-item" @onclick="() => AuthState.SetUser(null)">Logout</button></li>
+        </ul>
+    </div>
     }
 </nav>
 
@@ -37,10 +30,5 @@
     public void Dispose()
     {
         AuthStateNotifier.Unsubscribe(StateHasChanged);
-    }
-
-    public void Logout()
-    {
-        AuthState.SetUser(null);
     }
 }

@@ -1,15 +1,6 @@
 @page "/pages/totem/entrance"
 @rendermode InteractiveWebAssembly
 
-@using Frontend.States
-@using Shared.DTOs.Request
-@using Frontend.Components
-@using static Frontend.Components.CreateRequestForm
-@using static Frontend.Components.ErrorBox
-
-@inject HttpClient Http
-@inject AuthState AuthState
-@inject AuthStateNotifier AuthStateNotifier
 
 <PageTitle>@Title</PageTitle>
 
@@ -21,126 +12,14 @@
 
 <h3><strong>@Title</strong></h3>
 
-@if (AuthState.User == null)
-{
-    @if (LoginVisible)
-    {
-        <Login OnClickCallback="() => LoginVisible = false" />
-    } else {
-        <Register OnClickCallback="() => LoginVisible = true" />
-    }
-    return;
-}
-
-@if (Request == null)
-{
-    <CascadingValue Value="errorModel">
-        <ErrorBox OnClickCallback="ResetState" />
-    </CascadingValue>
-
-    <CreateRequestForm OnClickCallback="HandleCreateRequestSubmit" />
-    return;
-}
-
-<div class="alert alert-success alert-dismissible d-flex max-width-item">
-    <span class="bi bi-check-circle-fill"></span>
-    <strong class="me-2">Success</strong> Your request has been created.
-    <button type="button" class="btn-close" href="#" @onclick="Logout"></button>
-</div>
-
 @code {
-    private ErrorBoxModel errorModel = new();
-
     private readonly string Title = "Totem Entrance";
-
-    private bool LoginVisible = true;
-
-    private RequestDTO? Request { get; set; } = null;
 
     protected override void OnInitialized()
     {
-        AuthStateNotifier.Subscribe(StateHasChanged);
-
-        ResetState();
-
-        Request = null;
     }
 
     public void Dispose()
     {
-        AuthStateNotifier.Unsubscribe(StateHasChanged);
-    }
-
-    public async void HandleCreateRequestSubmit(RequestFormResponse responseRequest) {
-        if (responseRequest.ParkingDuration <= 0 || (responseRequest.Percentage == null && responseRequest.PhoneNumber != null))
-            return;
-
-        DateTime datetimeEnd = DateTime.Now.AddMinutes(responseRequest.ParkingDuration);
-
-        if (AuthState.User == null){
-            Console.Error.WriteLine("You are not logged in.");
-            return;
-        }
-
-        NewRequestDTO request = new NewRequestDTO(
-            AuthState.User.Email,
-            datetimeEnd.ToString("yyyy-MM-dd HH:mm:ss"),
-            responseRequest.Percentage,
-            responseRequest.PhoneNumber
-        );
-
-        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/requests", request);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            errorModel.StatusCode = response.StatusCode + "";
-            switch (response.StatusCode)
-            {
-                case System.Net.HttpStatusCode.BadRequest:
-                    errorModel.Errors = new List<string> (response.Content.ReadFromJsonAsync<MessagesDTO>().Result?.Messages ?? []);
-                    errorModel.Reason = "Please respect the validator suggestions";
-                    break;
-                case System.Net.HttpStatusCode.Conflict:
-                case System.Net.HttpStatusCode.InternalServerError:
-                    errorModel.Reason = response.Content.ReadFromJsonAsync<MessageDTO>().Result?.Message ?? "An error occurred while processing your request.";
-                    break;
-            }
-
-            // Console.Error.WriteLine($"Error creating request: {errorModel.Reason}");
-            // Console.Error.WriteLine($"Error creating request: {errorModel.StatusCode}");
-            // Console.Error.WriteLine($"Error creating request: {string.Join(", ", errorModel.Errors)}");
-
-            StateHasChanged();
-
-            return;
-        }
-
-        Request = await response.Content.ReadFromJsonAsync<RequestDTO>();
-
-        if (Request == null)
-        {
-            errorModel.Reason = "Failed to read the request from the response.";
-            // onsole.Error.WriteLine("Failed to read the request from the response.");
-        }
-
-        StateHasChanged();
-
-        // Console.WriteLine($"Request created: {Request.Email}");
-        // Console.WriteLine($"Request created: {Request.DatetimeStart}");
-        // Console.WriteLine($"Request created: {Request.DatetimeEnd}");
-        // Console.WriteLine($"Request created: {Request.Paid}");
-        // Console.WriteLine($"Request created: {Request.Kw ?? null}");
-    }
-
-    private void ResetState()
-    {
-        errorModel.Reason = string.Empty;
-        errorModel.StatusCode = string.Empty;
-        errorModel.Errors = new();
-    }
-    private void Logout()
-    {
-        AuthState.SetUser(null);
-        Request = null;
     }
 }

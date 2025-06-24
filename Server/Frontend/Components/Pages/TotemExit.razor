@@ -2,9 +2,14 @@
 @rendermode InteractiveWebAssembly
 
 @using Frontend.States
+@using Frontend.Components
+@using Shared.DTOs.Fine
+@using Shared.DTOs.Request
+@using static Frontend.Components.MessageBox
 
 @inject AuthState AuthState
 @inject AuthStateNotifier AuthStateNotifier
+@inject HttpClient HttpClient
 
 <PageTitle>@Title</PageTitle>
 
@@ -18,17 +23,21 @@
 
 @if (AuthState.User == null)
 {
-    <Login />
+    <Login OnClickCallback="HandleLoginSubmit" />
     return;
 }
 
-<div class="alert alert-success d-flex max-width-item">
-    <span class="bi bi-check-circle-fill"></span>
-    <strong class="me-2">Success</strong> You are logged in as @AuthState.User.Surname @AuthState.User.Name
-</div>
+<CascadingValue Value="RequestModel">
+    <MessageBox OnCloseCallBack="OnClickMessageBox" OnSubmitCallBack="OnSubmitMessageBox" />
+</CascadingValue>
 
 @code {
-    private readonly string Title = "Totem Exit";
+    public readonly string Title = "Exit Totem";
+    public readonly double TimeTollerance = 15;
+
+    private MessageBoxModel RequestModel = new();
+
+    private RequestDTO? Request = null;
 
     protected override void OnInitialized()
     {
@@ -38,5 +47,208 @@
     public void Dispose()
     {
         AuthStateNotifier.Unsubscribe(StateHasChanged);
+    }
+
+    private void OnClickMessageBox()
+    {
+        AuthState.SetUser(null);
+        RequestModel.Reset();
+        AuthStateNotifier.Notify();
+    }
+
+    private async void HandleLoginSubmit(bool isSuccess)
+    {
+        if (!isSuccess)
+            return;
+
+        if (AuthState.User == null)
+        {
+            Console.WriteLine("User is null");
+            return;
+        }
+
+        List<RequestDTO>? requests = await HttpClient.GetFromJsonAsync<List<RequestDTO>>("api/v1/requests/" + AuthState.User.Email + "?paid=false");
+
+        if (requests == null || requests.Count != 1)
+        {
+            SetMessageBox(
+                "Error",
+                "No pending request found for your account.",
+                MessageType.Warning
+            );
+            return;
+        }
+
+        Request = requests.First();
+
+        if(!IsRequestValidToPay()) return;
+
+        SetMessageBox(
+            "Request Details",
+            "",
+            MessageType.Success,
+            [
+                $"Request Email: {Request.Email}",
+                $"Request Start Date: {DateTime.Parse(Request.DatetimeStart).ToString("dd/MM/yyyy HH:mm")}",
+                $"Request End Date: {DateTime.Parse(Request.DatetimeEnd).ToString("dd/MM/yyyy HH:mm")}",
+                $"Slot ID: {Request.SlotId}",
+                $"Kw: {Request.Kw?.ToString() ?? "0"}"
+            ]);
+    }
+
+    private bool IsRequestValidToPay()
+    {
+        if (Request == null)
+            return false;
+
+        DateTime RequestDatetimeEnd = DateTime.Parse(Request.DatetimeEnd);
+        TimeSpan TimeDifference = RequestDatetimeEnd - DateTime.Now;
+
+        if (Math.Abs(TimeDifference.TotalMinutes) > TimeTollerance)
+        {
+            if (TimeDifference.TotalMinutes < 0)
+            {
+                RequestModel.Title = "Request Expired";
+                RequestModel.SubmitMessage = "I understand, I want to accept the fine";
+            } else {
+                RequestModel.Title = "Request will be closed too early";
+                RequestModel.SubmitMessage = "I understand, I want to pay the request at the fullest";
+            }
+
+            SetMessageBox(
+                RequestModel.Title,
+                "If you continue, the request will be transformed into a fine to pay.",
+                MessageType.Warning,
+                [
+                    $"Request Email: {Request.Email}",
+                    $"Request Start Date: {DateTime.Parse(Request.DatetimeStart).ToString("dd/MM/yyyy HH:mm")}",
+                    $"Request End Date: {RequestDatetimeEnd.ToString("dd/MM/yyyy HH:mm")}",
+                    $"Slot ID: {Request.SlotId}",
+                    $"Kw: {Request.Kw?.ToString() ?? "0"}"
+                ],
+                true,
+                SubmitMessage: RequestModel.SubmitMessage
+            );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private void OnSubmitMessageBox()
+    {
+        if (RequestModel.Type == MessageType.Success)
+            SetRequestPayed();
+        else
+            SetRequestToFine();
+    }
+
+    private async void SetRequestPayed()
+    {
+        if (Request == null)
+            return;
+
+        HttpResponseMessage response = await HttpClient.PatchAsync("api/v1/requests/" + Request.Email, null);
+        List<RequestDTO>? requests = await response.Content.ReadFromJsonAsync<List<RequestDTO>>();
+
+        if (requests == null || requests.Count != 1)
+        {
+            SetMessageBox(
+                "Error",
+                "An error occurred while trying to pay the request. Please try again later.",
+                MessageType.Warning
+            );
+            return;
+        }
+
+        Request = requests.First();
+
+        SetMessageBox(
+            "Request Paid",
+            "Your request has been successfully paid. Can you close this message box",
+            MessageType.Success,
+            [
+                $"Request Email: {Request.Email}",
+                $"Request Start Date: {DateTime.Parse(Request.DatetimeStart).ToString("dd/MM/yyyy HH:mm")}",
+                $"Request End Date: {DateTime.Parse(Request.DatetimeEnd).ToString("dd/MM/yyyy HH:mm")}",
+                $"Slot ID: {Request.SlotId}",
+                $"Kw: {Request.Kw?.ToString() ?? "0"}"
+            ]
+        );
+    }
+
+    private async void SetRequestToFine()
+    {
+        if (Request == null)
+            return;
+
+        DateTime RequestDatetimeEnd = DateTime.Parse(Request.DatetimeEnd);
+        TimeSpan TimeDifference = RequestDatetimeEnd - DateTime.Now;
+
+        if (TimeDifference.TotalMinutes > 15)
+        {
+            // TODO: in case of exit too early
+            Console.WriteLine("SetRequestToFine too early");
+        } else {
+            // TODO: in case of exit too late
+            Console.WriteLine("SetRequestToFine too late");
+
+            RequestDTO? DeletedRequest = await (await HttpClient.DeleteAsync("api/v1/requests?email=" + Request.Email + "&datetime_start=" + Request.DatetimeStart)).Content.ReadFromJsonAsync<RequestDTO>();
+
+            if (DeletedRequest == null)
+            {
+                SetMessageBox("Error",
+                    "An error occurred while trying to delete the request to transform it into a fine. Please try again later.",
+                    MessageType.Warning);
+                return;
+            }
+
+            FineNewDTO? NewFine = await (await HttpClient.PostAsJsonAsync("api/v1/fines", new FineNewDTO
+            {
+                Email = DeletedRequest.Email,
+                DatetimeStart = DeletedRequest.DatetimeStart,
+                DatetimeEnd = DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
+                Kw = DeletedRequest.Kw ?? 0,
+            })).Content.ReadFromJsonAsync<FineNewDTO>();
+
+            if (NewFine == null)
+            {
+                SetMessageBox("Error",
+                    "An error occurred while trying to create the fine. Please try again later.",
+                    MessageType.Warning);
+                return;
+            }
+
+            SetMessageBox("Fine Created",
+                "Your request has been successfully transformed into a fine. Can you close this message box",
+                MessageType.Success,
+                [
+                    $"Fine Email: {NewFine.Email}",
+                    $"Fine Start Date: {DateTime.Parse(NewFine.DatetimeStart).ToString("dd/MM/yyyy HH:mm")}",
+                    $"Fine End Date: {DateTime.Parse(NewFine.DatetimeEnd).ToString("dd/MM/yyyy HH:mm")}",
+                    $"Kw: {NewFine.Kw.ToString() ?? "0"}"
+                ]);
+        }
+    }
+
+    private void SetMessageBox(
+        string title,
+        string body,
+        MessageType type,
+        string[]? reasons = null,
+        bool hasSubmitButton = false,
+        bool isVisible = true,
+        string? SubmitMessage = null)
+    {
+        RequestModel.Reset();
+        RequestModel.Title = title;
+        RequestModel.Body = body;
+        RequestModel.Type = type;
+        RequestModel.Reasons = reasons?.ToList();
+        RequestModel.HasSubmitButton = hasSubmitButton;
+        RequestModel.IsVisible = isVisible;
+        RequestModel.SubmitMessage = SubmitMessage ?? "";
+        StateHasChanged();
     }
 }

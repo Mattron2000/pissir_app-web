@@ -51,4 +51,17 @@ public class RequestRepository(SmartParkingContext context) : IRequestRepository
 
         return request;
     }
+
+    public async Task<Request?> DeleteRequestAsync(string email, DateTime datetime_start)
+    {
+        var request = await _context.Requests.FindAsync(email, datetime_start);
+
+        if (request == null)
+            return null;
+
+        _context.Requests.Remove(request);
+        await _context.SaveChangesAsync();
+
+        return request;
+    }
 }

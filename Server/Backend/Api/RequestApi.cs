@@ -1,6 +1,7 @@
 using Backend.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs;
 using Shared.DTOs.Request;
 using Shared.FluentValidators.Properties;
@@ -21,6 +22,49 @@ public class RequestApi : IApiEndpoint
         adminApi.MapGet("/{email}", GetUserRequest);
         adminApi.MapPatch("/{email}", UpdateUserRequest);
         adminApi.MapPost("/", AddRequest);
+        adminApi.MapDelete("/", DeleteRequest);
+    }
+
+    private async Task<
+        Results<
+            BadRequest<MessagesDTO>,
+            NotFound<MessageDTO>,
+            ProblemHttpResult,
+            Ok<RequestDTO>
+        >
+    > DeleteRequest(
+        [FromQuery(Name = "email")] string email,
+        [FromQuery(Name = "datetime_start")] DateTime datetime_start,
+        RequestService service,
+        EmailValidator validator)
+    {
+        var result = await validator.ValidateAsync(email);
+
+        if (!result.IsValid)
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+
+        RequestResponse response = await service.DeleteRequestAsync(email, datetime_start);
+
+        if (response == null)
+            return TypedResults.NotFound(new MessageDTO("request not found"));
+
+        if (response.Result == RequestResultEnum.Success && response.Requests != null && response.Requests.Length == 1)
+            return TypedResults.Ok(response.Requests[0]);
+
+        if (response.Result == RequestResultEnum.UserNotFound && response.ErrorMessage != null)
+            return TypedResults.NotFound(new MessageDTO(response.ErrorMessage));
+
+        if (response.Result == RequestResultEnum.Failed && response.ErrorMessage != null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Delete Request Failed",
+                detail: response.ErrorMessage
+            );
+
+        return TypedResults.Problem(
+            statusCode: StatusCodes.Status501NotImplemented,
+            title: "Delete Request is not implemented yet"
+        );
     }
 
     private async Task<

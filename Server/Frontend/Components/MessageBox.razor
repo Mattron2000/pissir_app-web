@@ -1,0 +1,121 @@
+@namespace Frontend.Components
+
+@if (BoxModel.IsVisible)
+{
+<div class="alert @(GetMessageType()) alert-dismissible d-flex @(GetMessageDirection()) max-width-item">
+    <div class="d-flex align-items-center mb-2">
+        <span class="bi @(GetMessageIcon())" />
+        <strong class="me-2">@BoxModel.Title</strong>
+    </div>
+
+    @if (BoxModel.Body != null && BoxModel.Body.Length > 0)
+    {
+    <p class="mb-0">@BoxModel.Body</p>
+    }
+
+    @if (BoxModel.Reasons != null && BoxModel.Reasons.Count > 0)
+    {
+    <ul class="mt-2">
+        @foreach (var reason in BoxModel.Reasons)
+        {
+        <li>@reason</li>
+        }
+    </ul>
+    }
+    <button type="button" class="btn-close" @onclick="CloseMessageBox" />
+
+    @if (BoxModel.HasSubmitButton)
+    {
+    <button type="button" class="btn btn-warning" @onclick="SubmitMessageBox">@BoxModel.SubmitMessage</button>
+    }
+</div>
+}
+
+@code {
+    [CascadingParameter]
+    public required MessageBoxModel BoxModel { get; set; }
+
+    [Parameter]
+    public EventCallback OnCloseCallBack { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmitCallBack { get; set; }
+
+    public enum MessageType
+    {
+        Success,
+        Warning
+    }
+
+    public enum MessageDirection
+    {
+        TopDown,
+        LeftRight,
+    }
+
+    public class MessageBoxModel
+    {
+        public string? Title = null;
+        public string? Body = null;
+        public List<string>? Reasons = null;
+        public MessageType Type = MessageType.Success;
+        public bool IsVisible = false;
+        public MessageDirection Direction = MessageDirection.TopDown;
+        public bool HasSubmitButton = false;
+        public string SubmitMessage = "OK";
+
+        public void Reset()
+        {
+            Title = null;
+            Body = null;
+            Reasons = null;
+            Type = MessageType.Success;
+            IsVisible = false;
+            Direction = MessageDirection.TopDown;
+            HasSubmitButton = false;
+            SubmitMessage = "OK";
+        }
+    }
+
+    private string GetMessageType()
+    {
+        return BoxModel.Type switch
+        {
+            MessageType.Success => "alert-success",
+            MessageType.Warning => "alert-warning",
+            _ => "alert-info"
+        };
+    }
+
+    private string GetMessageIcon()
+    {
+        return BoxModel.Type switch
+        {
+            MessageType.Success => "bi-check-circle-fill",
+            MessageType.Warning => "bi-exclamation-triangle-fill",
+            _ => "bi-info"
+        };
+    }
+
+    private string GetMessageDirection()
+    {
+        return BoxModel.Direction switch
+        {
+            MessageDirection.TopDown => "flex-column",
+            MessageDirection.LeftRight => "flex-row",
+            _ => "flex-column"
+        };
+    }
+
+    private void CloseMessageBox()
+    {
+        BoxModel.Reset();
+
+        OnCloseCallBack.InvokeAsync();
+    }
+
+    private void SubmitMessageBox()
+    {
+        OnSubmitCallBack.InvokeAsync();
+    }
+}
