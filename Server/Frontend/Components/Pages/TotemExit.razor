@@ -56,11 +56,8 @@
         AuthStateNotifier.Notify();
     }
 
-    private async void HandleLoginSubmit(bool isSuccess)
+    private async void HandleLoginSubmit()
     {
-        if (!isSuccess)
-            return;
-
         if (AuthState.User == null)
         {
             Console.WriteLine("User is null");

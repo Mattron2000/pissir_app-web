@@ -1,0 +1,21 @@
+@if (LoginVisible)
+{
+    <Login OnClickCallback="OnClickLoginCallback" />
+    <button id="loginLink" class="link-button mt-2" @onclick="ToggleLoginVisible">Don't have an account? Sign up!</button>
+} else {
+    <Register />
+    <button id="loginLink" class="link-button mt-2" @onclick="ToggleLoginVisible">Already have an account? Sign in!</button>
+}
+
+@code {
+    [Parameter]
+    public EventCallback OnClickLoginCallback { get; set; }
+
+    private bool LoginVisible = true;
+
+    private void ToggleLoginVisible()
+    {
+        LoginVisible = !LoginVisible;
+        StateHasChanged();
+    }
+}

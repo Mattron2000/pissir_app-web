@@ -1,6 +1,14 @@
 @page "/pages/totem/entrance"
 @rendermode InteractiveWebAssembly
 
+@using Frontend.States
+@using Shared.DTOs.Request
+@using static Frontend.Components.MessageBox
+
+@inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <PageTitle>@Title</PageTitle>
 
@@ -12,14 +20,82 @@
 
 <h3><strong>@Title</strong></h3>
 
+<PriceBox />
+
+@if (AuthState.User == null)
+{
+    <LoginAndRegisterBox OnClickLoginCallback="OnSuccessfulLogin" />
+    return;
+}
+
+<div class="mb-3" />
+
+<CascadingValue Value="RequestModel">
+    <MessageBox OnSubmitCallBack="OnCloseMessageBox"/>
+</CascadingValue>
+
+@if (!isOkContinueToCreateRequestForm) return;
+
+<CreateRequestForm />
+
 @code {
     private readonly string Title = "Totem Entrance";
 
-    protected override void OnInitialized()
-    {
+    private MessageBoxModel RequestModel = new();
+
+    private bool isOkContinueToCreateRequestForm = false;
+
+    protected override void OnInitialized() => AuthStateNotifier.Subscribe(StateHasChanged);
+    public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
+
+    private async void OnSuccessfulLogin() {
+        if (AuthState.User == null) return;
+
+        if (await AlreadyHaveAnUnpaidRequest()) {
+            SetMessageBox(
+                "Unpaid Request",
+                "You already have an unpaid request. Please pay it before creating a new one.",
+                MessageType.Warning,
+                hasSubmitButton: true,
+                SubmitMessage: "Logout"
+            );
+            return;
+        }
+
+        // TODO: check reservation for PREMIUM users (backup in Temp4)
+
+        isOkContinueToCreateRequestForm = true;
+        StateHasChanged();
     }
 
-    public void Dispose()
+    private void OnCloseMessageBox() {
+        AuthState.SetUser(null);
+        RequestModel.Reset();
+        AuthStateNotifier.Notify();
+        isOkContinueToCreateRequestForm = false;
+        StateHasChanged();
+    }
+
+    private async Task<bool> AlreadyHaveAnUnpaidRequest() {
+        if (AuthState.User == null) return false;
+
+        var requests = await Http.GetFromJsonAsync<RequestDTO[]>("api/v1/requests/" + AuthState.User.Email + "?paid=false");
+
+        if (requests == null || requests.Length == 0) return false;
+
+        return requests.Any(r => r.Paid == false);
+    }
+
+    private void SetMessageBox(
+            string title,
+            string body,
+            MessageType type = MessageType.Warning,
+            string[]? reasons = null,
+            bool hasSubmitButton = false,
+            bool isVisible = true,
+            string? SubmitMessage = null)
     {
+        RequestModel.SetMessageBox(title, body, type, reasons, hasSubmitButton, isVisible, SubmitMessage);
+        StateHasChanged();
     }
 }

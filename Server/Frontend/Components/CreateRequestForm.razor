@@ -1,0 +1,248 @@
+@using System.Text.RegularExpressions
+@using Frontend.States
+@using Shared.DTOs.Request
+@using static Frontend.Components.MessageBox
+
+@inject AuthState AuthState
+@inject HttpClient Http
+
+<input type="radio" class="btn-check" name="options-base" id="PARKING" autocomplete="off">
+<label class="btn btn-outline-secondary mx-2" for="PARKING"
+    @onclick="() => HandleSelectServiceSubmit(ServiceType.PARKING)"
+>Sosta</label>
+
+<input type="radio" class="btn-check" name="options-base" id="CHARGING" autocomplete="off">
+<label class="btn btn-outline-secondary mx-2" for="CHARGING"
+    @onclick="() => HandleSelectServiceSubmit(ServiceType.CHARGING)"
+>Ricarica</label>
+
+@if (SelectedServiceType != null)
+{
+    <form method="post" @onsubmit="HandleFormSubmit" style="max-width: 500px; margin-right: auto;" class="my-3">
+        <div class="mb-3">
+            <label for="requestDatetimeEnd" class="form-label">How many minutes do you want to stay?</label>
+            <input class="form-control" id="requestDatetimeEnd" @bind="ParkingDuration">
+        </div>
+
+    @if(SelectedServiceType == ServiceType.CHARGING)
+    {
+        <div class="mb-3">
+            <label for="requestPercentage" class="form-label">How many percent do you want to charge?</label>
+            <input class="form-control" id="requestPercentage" @bind="Percentage">
+        </div>
+
+        <div class="mb-3">
+            <label for="requestPhoneNumber" class="form-label">Phone Number</label>
+            <input class="form-control" id="requestPhoneNumber" @bind="PhoneNumber">
+        </div>
+    }
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+}
+
+<CascadingValue Value="RequestModel">
+    <MessageBox OnSubmitCallBack="OnCloseMessageBox"/>
+</CascadingValue>
+
+@code {
+    private enum ServiceType
+    {
+        PARKING,
+        CHARGING
+    }
+
+    private ServiceType? SelectedServiceType { get; set; }
+
+    private int ParkingDuration { get; set; }
+    private int Percentage { get; set; }
+    private string PhoneNumber { get; set; } = string.Empty;
+
+    private void HandleSelectServiceSubmit(ServiceType selectedServiceType)
+    {
+        if (SelectedServiceType == selectedServiceType)
+            return;
+
+        Percentage = 50;
+        PhoneNumber = string.Empty;
+
+        SelectedServiceType = selectedServiceType;
+    }
+
+    private MessageBoxModel RequestModel = new();
+
+    private static readonly Regex PhoneNumberRegex = new Regex(@"^\d{10}$");
+
+    private async void HandleFormSubmit()
+    {
+        if (!CheckValuesAreValid()) return;
+
+        // Console.WriteLine("SelectedServiceType: " + SelectedServiceType);
+        // Console.WriteLine("ParkingDuration: " + ParkingDuration);
+        // Console.WriteLine("Percentage: " + Percentage);
+        // Console.WriteLine("PhoneNumber: " + PhoneNumber);
+
+        NewRequestDTO? requestForm = MakeNewRequestForm();
+
+        if (requestForm == null) return;
+
+        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/requests", requestForm);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            switch (response.StatusCode)
+            {
+                case System.Net.HttpStatusCode.BadRequest:
+                    SetMessageBox(
+                        title:      response.StatusCode.ToString(),
+                        body:       "Please respect the validator suggestions",
+                        reasons:    (await response.Content.ReadFromJsonAsync<MessagesDTO>())?.Messages
+                    );
+                    break;
+                case System.Net.HttpStatusCode.Conflict:
+                    SetMessageBox(
+                        title:      response.StatusCode.ToString(),
+                        body:       (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "An error occurred while trying to create the request. Please try again later."
+                    );
+                    break;
+                default:
+                    SetMessageBox(
+                        title:      response.StatusCode.ToString(),
+                        body:       "An error occurred while trying to create the request. Please try again later."
+                    );
+                    break;
+            }
+            return;
+        }
+
+        RequestDTO? request = await response.Content.ReadFromJsonAsync<RequestDTO>();
+
+        if (request == null)
+        {
+            SetMessageBox(
+                title:      "Error",
+                body:       "Request is null"
+            );
+            return;
+        }
+
+        string[] requestReasons;
+
+        if (SelectedServiceType == ServiceType.PARKING)
+            requestReasons = [
+                "Email: " +             request.Email,
+                "Datetime start: " +    request.DatetimeStart,
+                "Datetime end: " +      request.DatetimeEnd,
+                "Slot ID: " +           request.SlotId,
+            ];
+        else
+            requestReasons = [
+                "Email: " +             request.Email,
+                "Datetime start: " +    request.DatetimeStart,
+                "Datetime end: " +      request.DatetimeEnd,
+                "Kw: " +                request.Kw,
+                "Slot ID: " +           request.SlotId,
+            ];
+
+        SetMessageBox(
+            title:              response.StatusCode.ToString(),
+            body:               "Request created successfully! You can now enter in the parking lot",
+            type:               MessageType.Success,
+            reasons:            requestReasons,
+            hasSubmitButton:    true,
+            SubmitMessage:      "Logout"
+        );
+    }
+
+    private bool CheckValuesAreValid()
+    {
+        List<string> reasons = new();
+
+        if (SelectedServiceType == null)
+            reasons.Add("Please select a service type");
+
+        if (ParkingDuration <= 0)
+            reasons.Add("Please insert a valid parking duration");
+
+        if (Percentage <= 0 || Percentage > 100)
+            reasons.Add("Please insert a valid percentage");
+
+        if (PhoneNumber != string.Empty && !PhoneNumberRegex.IsMatch(PhoneNumber))
+            reasons.Add("Please insert a valid phone number");
+
+        if (reasons.Count > 0)
+        {
+            SetMessageBox(
+                title:      "Validation Error",
+                body:       "Please respect the validator suggestions",
+                reasons:    reasons.ToArray()
+            );
+            return false;
+        }
+
+        RequestModel.Reset();
+        return true;
+    }
+
+    private NewRequestDTO? MakeNewRequestForm()
+    {
+        if (AuthState.User == null)
+        {
+            SetMessageBox(
+                title:      "Error",
+                body:       "User is null"
+            );
+            return null;
+        }
+
+        if (SelectedServiceType == ServiceType.PARKING)
+            return new(
+                Email:          AuthState.User.Email,
+                DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
+                Percentage:     null,
+                PhoneNumber:    null
+            );
+
+        if (PhoneNumber == string.Empty)
+            return new(
+                Email:          AuthState.User.Email,
+                DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
+                Percentage:     Percentage,
+                PhoneNumber:    null
+            );
+
+        return new(
+            Email:          AuthState.User.Email,
+            DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
+            Percentage:     Percentage,
+            PhoneNumber:    PhoneNumber
+        );
+    }
+
+    private void SetMessageBox(
+            string title,
+            string body,
+            MessageType type = MessageType.Warning,
+            string[]? reasons = null,
+            bool hasSubmitButton = false,
+            bool isVisible = true,
+            string? SubmitMessage = null)
+    {
+        RequestModel.SetMessageBox(title, body, type, reasons, hasSubmitButton, isVisible, SubmitMessage);
+        StateHasChanged();
+    }
+
+    private void OnCloseMessageBox()
+    {
+        RequestModel.Reset();
+
+        SelectedServiceType = null;
+        ParkingDuration = 0;
+        Percentage = 50;
+        PhoneNumber = string.Empty;
+
+        AuthState.SetUser(null);
+
+        StateHasChanged();
+    }
+}

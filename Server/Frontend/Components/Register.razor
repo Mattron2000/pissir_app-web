@@ -1,0 +1,128 @@
+@using FluentValidation
+@using Frontend.States
+@using Shared.DTOs.User
+@using Shared.FluentValidators
+@using Frontend.Components
+@using static Frontend.Components.MessageBox
+
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject IValidator<UserRegisterDTO> Validator
+@inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
+
+<PageTitle>@Title</PageTitle>
+
+@if (! OperatingSystem.IsBrowser())
+{
+    <LoadingSpinner Name="@(Title + " WebAssembly")" />
+    return;
+}
+
+<h3>User Registration</h3>
+
+@if (AuthState.User != null)
+{
+    <div class="alert alert-success d-flex max-width-item">
+        <span class="bi bi-check-circle-fill"></span>
+        <strong class="me-2">Success</strong> You are logged in as @AuthState.User.Surname @AuthState.User.Name
+    </div>
+    return;
+}
+
+<CascadingValue Value="RequestModel">
+    <MessageBox OnCloseCallBack="OnCloseHandler" OnSubmitCallBack="OnSubmitHandler"/>
+</CascadingValue>
+
+<EditForm Model="@registerUser" OnSubmit="HandleRegisterSubmit">
+    <div class="mb-3 max-width-item">
+        <label for="email" class="form-label">Email:</label>
+        <InputText class="form-control" @bind-Value="registerUser.Email" />
+    </div>
+
+    <div class="mb-3 max-width-item">
+        <label for="password" class="form-label">Password:</label>
+        <InputText class="form-control" type="password"  @bind-Value="registerUser.Password" />
+    </div>
+
+    <div class="mb-3 max-width-item">
+        <label for="name" class="form-label">Name:</label>
+        <InputText class="form-control" @bind-Value="registerUser.Name" />
+    </div>
+
+    <div class="mb-3 max-width-item">
+        <label for="surname" class="form-label">Surname:</label>
+        <InputText class="form-control" @bind-Value="registerUser.Surname" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@code {
+    private readonly string Title = "Register";
+    private MessageBoxModel RequestModel = new();
+    private UserRegisterDTO registerUser = new();
+
+    private void OnCloseHandler()
+    {
+        RequestModel.Reset();
+        StateHasChanged();
+    }
+
+    private async Task HandleRegisterSubmit()
+    {
+        var results = await Validator.ValidateAsync(registerUser);
+
+        if (!results.IsValid)
+        {
+            SetMessageBox(
+                "Validation Error",
+                "Please respect the validator suggestions",
+                MessageType.Warning,
+                results.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+            return;
+        }
+
+        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/users/register", registerUser);
+
+        if (response.IsSuccessStatusCode)
+            SetMessageBox(
+                "Registered Successfully",
+                "You can now log in with your new account.",
+                MessageType.Success,
+                hasSubmitButton: true,
+                SubmitMessage: "Login");
+        else
+        {
+            var message = await response.Content.ReadFromJsonAsync<MessageDTO>();
+            SetMessageBox(
+                "Registration Failed",
+                (message?.Message ?? "Unknown error") + ", Please try again.",
+                MessageType.Warning
+            );
+        }
+    }
+
+    private void SetMessageBox(
+        string title,
+        string body,
+        MessageType type,
+        string[]? reasons = null,
+        bool hasSubmitButton = false,
+        bool isVisible = true,
+        string? SubmitMessage = null)
+    {
+        RequestModel.SetMessageBox(
+            title,
+            body,
+            type,
+            reasons,
+            hasSubmitButton,
+            isVisible,
+            SubmitMessage);
+        StateHasChanged();
+    }
+
+    private void OnSubmitHandler() => NavigationManager.NavigateTo("pages/totem/entrance", true);
+}

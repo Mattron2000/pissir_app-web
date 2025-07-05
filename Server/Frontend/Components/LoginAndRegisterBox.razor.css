@@ -1,0 +1,13 @@
+.link-button {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    color: #337ab7; /* or any other link color you prefer */
+    text-decoration: underline;
+}
+
+.link-button:hover {
+    text-decoration: none;
+}

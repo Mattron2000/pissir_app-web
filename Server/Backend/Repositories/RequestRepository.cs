@@ -21,7 +21,13 @@ public class RequestRepository(SmartParkingContext context) : IRequestRepository
             r => r.Email == email && r.Paid == false
         ).ToArrayAsync();
 
-        foreach (var request in requests) request.Paid = true;
+        if (requests.Length != 1)
+            return null;
+
+        if (requests[0].Paid != null && requests[0].Paid == true)
+            return null;
+
+        requests[0].Paid = true;
 
         await _context.SaveChangesAsync();
 

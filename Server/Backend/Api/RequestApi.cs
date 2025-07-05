@@ -126,7 +126,7 @@ public class RequestApi : IApiEndpoint
 
         if (response == null)
             return TypedResults.Problem(
-                statusCode: StatusCodes.Status500InternalServerError,
+                statusCode: StatusCodes.Status304NotModified,
                 title: "User Request Update Failed: request response is null"
             );
 

@@ -81,17 +81,16 @@ public class RequestService(IRequestRepository requestRepository, IUserRepositor
 
         var requests = await _requestRepository.UpdateRequestsAsync(email);
 
-        if (requests == null)
-            return RequestResponse.Success([]);
+        if (requests == null || requests.Length != 1) return RequestResponse.Failed();
 
-        return RequestResponse.Success([.. requests.Select(r => new RequestDTO(
-            r.Email,
-            r.DatetimeStart.ToString(),
-            r.DatetimeEnd.ToString(),
-            r.Kw,
-            r.Paid,
-            r.SlotId
-        ))]);
+        return RequestResponse.Success([new RequestDTO(
+            requests[0].Email,
+            requests[0].DatetimeStart.ToString(),
+            requests[0].DatetimeEnd.ToString(),
+            requests[0].Kw,
+            requests[0].Paid,
+            requests[0].SlotId
+        )]);
     }
 
     internal async Task<RequestResponse> AddRequestAsync(NewRequestDTO requestDto)

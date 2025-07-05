@@ -32,7 +32,8 @@
 
 @code {
     [Parameter]
-    public EventCallback<bool> OnClickCallback { get; set; }
+    public EventCallback OnClickCallback { get; set; }
+
     private MessageBoxModel errorModel = new();
     private UserLoginDTO loginUser = new();
     private readonly string Title = "Login";
@@ -55,16 +56,16 @@
 
     private async void HandleLoginSubmit()
     {
-        if (ValidateUserDataInput() == false)
+        if (!ValidateUserDataInput())
             return;
 
         HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/v1/users/login", loginUser);
 
         if (!response.IsSuccessStatusCode)
         {
-            errorModel.Title = (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "Unknown error";
-            errorModel.Type = MessageType.Warning;
-            errorModel.IsVisible = true;
+            SetMessageBox(
+                (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "Unknown error", ""
+            );
             return;
         }
 
@@ -83,12 +84,24 @@
         errorModel.Reasons = results.Errors.Select(e => e.ErrorMessage).ToList();
 
         if (!StatusValidation)
-        {
-            errorModel.Title = "Please respect the validator suggestions";
-            errorModel.Type = MessageType.Warning;
-            errorModel.IsVisible = true;
-        }
+            SetMessageBox(
+                "Validation Error",
+                "Please respect the validator suggestions"
+            );
 
         return StatusValidation;
+    }
+
+    private void SetMessageBox(
+            string title,
+            string body,
+            MessageType type = MessageType.Warning,
+            string[]? reasons = null,
+            bool hasSubmitButton = false,
+            bool isVisible = true,
+            string? SubmitMessage = null)
+    {
+        errorModel.SetMessageBox(title, body, type, reasons, hasSubmitButton, isVisible, SubmitMessage);
+        StateHasChanged();
     }
 }

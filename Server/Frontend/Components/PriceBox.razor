@@ -1,0 +1,36 @@
+@using Shared.DTOs.Admin
+@using System.Globalization
+
+@inject HttpClient Http
+
+<div class="card d-inline-flex flex-row m-2" style="width: 18rem;">
+    @if (PricesData == null)
+    {
+        <div class="card-body text-center">
+            <h5 class="card-title">Loading...</h5>
+        </div>
+    }
+
+    @foreach (var priceData in PricesData ?? Array.Empty<PriceDataDTO>())
+    {
+    <div class="card-body text-center">
+        <h5 class="card-title">@priceData.Type</h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">@priceData.Amount.ToString("C", new CultureInfo("it-IT"))</h6>
+    </div>
+    }
+</div>
+
+@code {
+    private PriceDataDTO[]? PricesData { get; set; } = null;
+
+    protected override void OnInitialized()
+    {
+        SetPriceData();
+    }
+
+    private async void SetPriceData()
+    {
+        PricesData = await Http.GetFromJsonAsync<PriceDataDTO[]>("api/v1/admin/prices");
+        StateHasChanged();
+    }
+}
