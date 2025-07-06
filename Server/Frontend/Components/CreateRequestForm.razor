@@ -94,21 +94,21 @@
             {
                 case System.Net.HttpStatusCode.BadRequest:
                     SetMessageBox(
-                        title:      response.StatusCode.ToString(),
-                        body:       "Please respect the validator suggestions",
+                        response.StatusCode.ToString(),
+                        "Please respect the validator suggestions",
                         reasons:    (await response.Content.ReadFromJsonAsync<MessagesDTO>())?.Messages
                     );
                     break;
                 case System.Net.HttpStatusCode.Conflict:
                     SetMessageBox(
-                        title:      response.StatusCode.ToString(),
-                        body:       (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "An error occurred while trying to create the request. Please try again later."
+                        response.StatusCode.ToString(),
+                        (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "An error occurred while trying to create the request. Please try again later."
                     );
                     break;
                 default:
                     SetMessageBox(
-                        title:      response.StatusCode.ToString(),
-                        body:       "An error occurred while trying to create the request. Please try again later."
+                        response.StatusCode.ToString(),
+                        "An error occurred while trying to create the request. Please try again later."
                     );
                     break;
             }
@@ -120,8 +120,8 @@
         if (request == null)
         {
             SetMessageBox(
-                title:      "Error",
-                body:       "Request is null"
+                "Error",
+                "Request is null"
             );
             return;
         }
@@ -131,26 +131,26 @@
         if (SelectedServiceType == ServiceType.PARKING)
             requestReasons = [
                 "Email: " +             request.Email,
-                "Datetime start: " +    request.DatetimeStart,
-                "Datetime end: " +      request.DatetimeEnd,
+                "Datetime start: " +    DateTime.Parse(request.DatetimeStart).ToString("yyyy-MM-dd HH:mm"),
+                "Datetime end: " +      DateTime.Parse(request.DatetimeEnd).ToString("yyyy-MM-dd HH:mm"),
                 "Slot ID: " +           request.SlotId,
             ];
         else
             requestReasons = [
                 "Email: " +             request.Email,
-                "Datetime start: " +    request.DatetimeStart,
-                "Datetime end: " +      request.DatetimeEnd,
+                "Datetime start: " +    DateTime.Parse(request.DatetimeStart).ToString("yyyy-MM-dd HH:mm"),
+                "Datetime end: " +      DateTime.Parse(request.DatetimeEnd).ToString("yyyy-MM-dd HH:mm"),
                 "Kw: " +                request.Kw,
                 "Slot ID: " +           request.SlotId,
             ];
 
         SetMessageBox(
-            title:              response.StatusCode.ToString(),
-            body:               "Request created successfully! You can now enter in the parking lot",
-            type:               MessageType.Success,
-            reasons:            requestReasons,
-            hasSubmitButton:    true,
-            SubmitMessage:      "Logout"
+            response.StatusCode.ToString(),
+            "Request created successfully! You can now enter in the parking lot",
+            MessageType.Success,
+            requestReasons,
+            true,
+            SubmitMessage: "Logout"
         );
     }
 
@@ -173,8 +173,8 @@
         if (reasons.Count > 0)
         {
             SetMessageBox(
-                title:      "Validation Error",
-                body:       "Please respect the validator suggestions",
+                "Validation Error",
+                "Please respect the validator suggestions",
                 reasons:    reasons.ToArray()
             );
             return false;
@@ -188,10 +188,7 @@
     {
         if (AuthState.User == null)
         {
-            SetMessageBox(
-                title:      "Error",
-                body:       "User is null"
-            );
+            SetMessageBox("Error", "User is null");
             return null;
         }
 
@@ -221,7 +218,7 @@
 
     private void SetMessageBox(
             string title,
-            string body,
+            string body = "",
             MessageType type = MessageType.Warning,
             string[]? reasons = null,
             bool hasSubmitButton = false,

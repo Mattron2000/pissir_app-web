@@ -64,7 +64,7 @@
         if (!response.IsSuccessStatusCode)
         {
             SetMessageBox(
-                (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "Unknown error", ""
+                (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "Unknown error"
             );
             return;
         }
@@ -94,7 +94,7 @@
 
     private void SetMessageBox(
             string title,
-            string body,
+            string body = "",
             MessageType type = MessageType.Warning,
             string[]? reasons = null,
             bool hasSubmitButton = false,

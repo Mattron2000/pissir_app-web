@@ -106,8 +106,8 @@
 
     private void SetMessageBox(
         string title,
-        string body,
-        MessageType type,
+        string body = "",
+        MessageType type = MessageType.Warning,
         string[]? reasons = null,
         bool hasSubmitButton = false,
         bool isVisible = true,
