@@ -1,6 +1,13 @@
 @page "/pages/remote"
 @rendermode InteractiveWebAssembly
 
+@using Frontend.States
+@using Frontend.Components
+@using static Frontend.Components.MessageBox
+
+@inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
+
 <PageTitle>@Title</PageTitle>
 
 @if (!OperatingSystem.IsBrowser())
@@ -11,14 +18,55 @@
 
 <h3><strong>@Title</strong></h3>
 
+@if (AuthState.User == null)
+{
+    <LoginAndRegisterBox OnClickLoginCallback="OnSuccessfulLogin" />
+    return;
+}
+
+<div class="mb-3" />
+
+<CascadingValue Value="RequestModel">
+    <MessageBox OnSubmitCallBack="OnCloseMessageBox"/>
+</CascadingValue>
+
+@if (AuthState.User.Type == "ADMIN")
+{
+    <AdminPanel />
+} else {
+    <UserPanel />
+}
+
 @code {
     private readonly string Title = "Remote Web Page";
 
-    protected override void OnInitialized()
+    private MessageBoxModel RequestModel = new();
+
+    protected override void OnInitialized() => AuthStateNotifier.Subscribe(StateHasChanged);
+    public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
+
+    private void OnSuccessfulLogin()
     {
+        if (AuthState.User == null)
+            SetMessageBox("Login Required", "You must be logged in to access the remote web page.");
     }
 
-    public void Dispose()
+    private void SetMessageBox(
+            string title,
+            string body = "",
+            MessageType type = MessageType.Warning,
+            string[]? reasons = null,
+            bool hasSubmitButton = false,
+            bool isVisible = true,
+            string? SubmitMessage = null)
     {
+        RequestModel.SetMessageBox(title, body, type, reasons, hasSubmitButton, isVisible, SubmitMessage);
+        StateHasChanged();
+    }
+
+    private void OnCloseMessageBox() {
+        AuthState.SetUser(null);
+        RequestModel.Reset();
+        StateHasChanged();
     }
 }

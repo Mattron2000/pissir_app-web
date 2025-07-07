@@ -63,6 +63,9 @@
     private MessageBoxModel RequestModel = new();
     private UserRegisterDTO registerUser = new();
 
+    protected override void OnInitialized() => AuthStateNotifier.Subscribe(StateHasChanged);
+    public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
+
     private void OnCloseHandler()
     {
         RequestModel.Reset();
@@ -124,5 +127,10 @@
         StateHasChanged();
     }
 
-    private void OnSubmitHandler() => NavigationManager.NavigateTo("pages/totem/entrance", true);
+    private void OnSubmitHandler() {
+        AuthState.SetUser(null);
+        RequestModel.Reset();
+        StateHasChanged();
+        NavigationManager.Refresh(true);
+    }
 }

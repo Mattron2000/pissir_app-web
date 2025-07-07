@@ -71,7 +71,6 @@
     private void OnCloseMessageBox() {
         AuthState.SetUser(null);
         RequestModel.Reset();
-        AuthStateNotifier.Notify();
         isOkContinueToCreateRequestForm = false;
         StateHasChanged();
     }

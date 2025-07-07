@@ -86,7 +86,8 @@
         if (!StatusValidation)
             SetMessageBox(
                 "Validation Error",
-                "Please respect the validator suggestions"
+                "Please respect the validator suggestions",
+                reasons: errorModel.Reasons.ToArray()
             );
 
         return StatusValidation;

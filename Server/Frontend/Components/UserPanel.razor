@@ -1,0 +1,13 @@
+@using Frontend.States
+
+@inject AuthState AuthState
+
+@if (AuthState.User == null)
+{
+    <strong style="color: red;">Please log in to access this page.</strong>
+    return;
+}
+
+<p>Welcome, User! (@AuthState.User.Type) You can access the remote web page.</p>
+
+@code {}

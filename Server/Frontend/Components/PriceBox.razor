@@ -28,7 +28,7 @@
         SetPriceData();
     }
 
-    private async void SetPriceData()
+    public async void SetPriceData()
     {
         PricesData = await Http.GetFromJsonAsync<PriceDataDTO[]>("api/v1/admin/prices");
         StateHasChanged();
