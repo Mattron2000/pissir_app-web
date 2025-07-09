@@ -78,3 +78,9 @@ dotnet add Server/Frontend reference Server/Shared
 ```sh
 dotnet add Server/Shared package FluentValidation --version 12.0.0
 ```
+
+## MQTT
+
+```sh
+dotnet add Server/Shared package MQTTnet --version 5.0.1.1416
+```

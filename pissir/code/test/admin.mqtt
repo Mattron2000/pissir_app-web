@@ -1,0 +1,8 @@
+# %%
+url: tcp://localhost:1883
+clientId: admin
+user: admin
+password: admin
+
+# $$
+iot/sensors/+/status

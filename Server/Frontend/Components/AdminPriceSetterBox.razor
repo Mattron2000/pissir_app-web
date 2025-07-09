@@ -1,0 +1,118 @@
+@using Frontend.States
+@using Shared.DTOs.Admin
+@using Shared.FluentValidators.Properties
+@using static Frontend.Components.MessageBox
+
+@inject AuthState AuthState
+@inject HttpClient Http
+
+@if (AuthState.User == null)
+{
+    <strong style="color: red;">Please log in to access this page.</strong>
+    return;
+}
+
+<CascadingValue Value="messageModel">
+    <MessageBox />
+</CascadingValue>
+
+<div class="d-flex flex-column justify-content-center align-items-center bg-secondary-subtle rounded-3 p-3 me-3" style=" width: 100%; max-width: 375px;">
+    <PriceBox @ref="PriceBox" />
+
+    <hr style="width: 100%; height: 2px;">
+
+    <div class="d-flex justify-content-left mb-3">
+        <div class="me-3">
+            <strong>Parking Price</strong>
+            <InputNumber class="form-control" placeholder="Insert new parking price" @bind-Value="ParkingPrice" />
+        </div>
+        <button class="btn btn-primary" @onclick="() => OnClickSetPrice(ParkingPrice)">Set price</button>
+    </div>
+
+
+    <div class="d-flex justify-content-left mb-3">
+        <div class="me-3">
+            <strong>Charging Price</strong>
+            <InputNumber class="form-control" placeholder="Insert new charging price" @bind-Value="ChargingPrice" />
+        </div>
+        <button class="btn btn-primary" @onclick="() => OnClickSetPrice(ChargingPrice)">Set price</button>
+    </div>
+</div>
+
+@code {
+    private decimal ParkingPrice { get; set; } = 0.0M;
+    private decimal ChargingPrice { get; set; } = 0.0M;
+
+    private MessageBoxModel messageModel = new MessageBoxModel();
+
+    private PriceBox PriceBox = new PriceBox();
+
+    private void OnClickSetPrice(decimal price)
+    {
+        if (!IsAValidPrice(price)) return;
+        messageModel.Reset();
+
+        switch (price)
+        {
+            case var p when p == ParkingPrice:
+                FetchNewPrice("PARKING", ParkingPrice);
+                break;
+            case var c when c == ChargingPrice:
+                FetchNewPrice("CHARGING", ChargingPrice);
+                break;
+            default:
+                SetMessageBox("Invalid Price", "The price input is not valid.");
+                break;
+        }
+    }
+
+    private bool IsAValidPrice(decimal price)
+    {
+        PriceValidator validator = new PriceValidator();
+        var result = validator.Validate(price);
+
+        if (result.IsValid)
+            return true;
+
+        SetMessageBox(
+            "Invalid Price",
+            "The price input is not valid.",
+            reasons: result.Errors.Select(e => e.ErrorMessage).ToArray()
+        );
+
+        return false;
+    }
+
+    private async void FetchNewPrice(string type, decimal price)
+    {
+        var response = await Http.PatchAsJsonAsync<PriceDataDTO>($"api/v1/admin/prices?type={type}&price={price}", new PriceDataDTO(type, price));
+
+        if (response.IsSuccessStatusCode) {
+            SetMessageBox(response.StatusCode.ToString(), "The price has been updated successfully.", MessageType.Success);
+            PriceBox.SetPriceData();
+            return;
+        }
+
+        var errorContent = await response.Content.ReadFromJsonAsync<MessagesDTO>();
+
+        if (errorContent == null || errorContent?.Messages == null || errorContent.Messages.Length == 0) {
+            SetMessageBox("Error", "An unknown error occurred while updating the price.");
+            return;
+        }
+
+        SetMessageBox("Error", "An error occurred while updating the price.", reasons: errorContent.Messages);
+    }
+
+    private void SetMessageBox(
+            string      title,
+            string      body            = "",
+            MessageType type            = MessageType.Warning,
+            string[]?   reasons         = null,
+            bool        hasSubmitButton = false,
+            bool        isVisible       = true,
+            string?     SubmitMessage   = null
+    ) {
+        messageModel.SetMessageBox(title, body, type, reasons, hasSubmitButton, isVisible, SubmitMessage);
+        StateHasChanged();
+    }
+}

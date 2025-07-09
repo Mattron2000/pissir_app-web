@@ -1,0 +1,98 @@
+@using Frontend.States
+@using MQTTnet
+@using System.Buffers
+@using Shared.DTOs.MQTT
+@using System.Text.Json
+
+@inject AuthStateNotifier AuthStateNotifier
+
+<div class="accordion col ml-3 mt-3" style="min-width: 350px;">
+    <div class="accordion-item accordion-item-sensor">
+        <h2 class="accordion-header background-secondary">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+            data-bs-target="#accordion-item-sensor" aria-expanded="true" aria-controls="accordion-item-sensor" id="accordion-item-sensor-button">
+            <b>Sensors</b>
+            </button>
+        </h2>
+    </div>
+    <div id="accordion-item-sensor" class="accordion-collapse collapse show">
+        <div class="accordion-body d-flex flex-wrap" id="accordion-body-sensor" >
+            @foreach (var sensorId in sensorsData.Keys)
+            {
+            <div class="card-sensor card @(sensorsData[sensorId].Equals("FREE") ? "bg-success" : "bg-danger") bg-opacity-25 m-1">
+                <div class="card-body text-center">
+                    <h5 class="card-title">@sensorId</h5>
+                    <p class="card-text">@(sensorsData[sensorId])</p>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private IMqttClient? mqttClient;
+
+    private Dictionary<string, string> sensorsData = new();
+
+    protected override async void OnInitialized() {
+        AuthStateNotifier.Subscribe(StateHasChanged);
+
+        var mqttFactory = new MqttClientFactory();
+        mqttClient = mqttFactory.CreateMqttClient();
+
+        var mqttClientOptions = new MqttClientOptionsBuilder()
+            .WithWebSocketServer(o => o.WithUri("ws://localhost:9001"))
+            .WithClientId("admin")
+            .WithCredentials("admin", "admin")
+            .WithCleanSession()
+            .Build();
+
+        var response = await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+
+        if (response.ResultCode != MqttClientConnectResultCode.Success) {
+            Console.WriteLine("Failed to connect to MQTT broker: ");
+            return;
+        }
+
+        Console.WriteLine("The MQTT client is connected. " + response.ResultCode);
+
+        await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("iot/sensors/+/status").Build());
+
+        mqttClient.ApplicationMessageReceivedAsync += AdminMQTTHandler;
+    }
+
+    public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
+
+    private Task AdminMQTTHandler(MqttApplicationMessageReceivedEventArgs e)
+    {
+        var topic = e.ApplicationMessage.Topic;
+        var payloadString = System.Text.Encoding.UTF8.GetString(e.ApplicationMessage.Payload.ToArray()).Trim();
+
+        Console.WriteLine($"Received message on topic {topic}: {payloadString}");
+
+        if (topic.StartsWith("iot/sensors/") && topic.EndsWith("/status"))
+        {
+            var sensorId = topic.Split('/')[2];
+
+            SensorData? sensorData = null;
+            try {
+                sensorData = JsonSerializer.Deserialize<SensorData>(payloadString);
+            } catch (Exception ex) {
+                Console.WriteLine($"Failed to deserialize payload for sensor {sensorId}: {ex.Message}");
+            }
+
+            if (sensorData == null) return Task.CompletedTask;
+
+            Console.WriteLine($"Sensor {sensorId}, status: {sensorData.Status}, slot: {sensorData.SlotId}");
+
+            sensorsData[sensorId] = sensorData.Status;
+            StateHasChanged();
+
+            return Task.CompletedTask;
+        } else
+
+        Console.WriteLine($"Received message on unknown topic: {topic}");
+        return Task.CompletedTask;
+    }
+}

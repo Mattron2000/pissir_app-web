@@ -43,3 +43,8 @@ topic   read        iot/monitor/count
 topic   read        iot/mobiles/+/data
 topic   read        iot/mwbot/debug
 topic   read        iot/mobiles/+/new
+
+user admin
+topic   readwrite   LWT
+topic   write       iot/sensors/+/check
+topic   read        iot/sensors/+/status

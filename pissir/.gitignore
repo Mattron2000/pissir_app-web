@@ -41,3 +41,9 @@ temp
 modifiche.txt
 code/backend/backend-tcplocalhost1883/.lck
 code/mwbot/mwbot-tcplocalhost1883/.lck
+
+#
+# BACKEND IGNORE
+#
+code/backend/*
+code/backend

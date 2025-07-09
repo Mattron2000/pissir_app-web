@@ -23,4 +23,4 @@ dependencyResolutionManagement {
 }
 
 // list of sub-projects
-include("util", "sensor", "monitor", "mobile", "mwbot", "debug", "backend")
+include("util", "sensor", "monitor", "mobile", "mwbot", "debug")
