@@ -1,0 +1,45 @@
+@using Frontend.States
+@using Shared.DTOs.User
+
+@inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
+@inject HttpClient Http
+
+@if (AuthState.User == null)
+{
+    return;
+}
+
+<div class="d-flex flex-column justify-content-center align-items-center bg-secondary-subtle rounded-3 p-3" style="max-width: fit-content;">
+    <h3><strong>@AuthState.User.Surname @AuthState.User.Name</strong></h3>
+    <div class="mb-3">
+        Type: @AuthState.User.Type
+    </div>
+    <div class="mb-3">
+        Email: @AuthState.User.Email
+    </div>
+    <div class="mb-3">
+        @if (AuthState.User.Type == "BASE") {
+            <button class="btn btn-primary" @onclick="SwitchUserType">Make Premium</button>
+        } else {
+            <button class="btn btn-primary" @onclick="SwitchUserType">Make Base</button>
+        }
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized() => AuthStateNotifier.Subscribe(StateHasChanged);
+    public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
+
+    private async void SwitchUserType() {
+        if (AuthState.User == null) return;
+
+        var newType = AuthState.User.Type == "BASE" ? "PREMIUM" : "BASE";
+        var response = await Http.PatchAsJsonAsync("api/v1/users/" + AuthState.User.Email + "/type", new {});
+
+        if (response.IsSuccessStatusCode){
+            AuthState.SetUser(await response.Content.ReadFromJsonAsync<UserEntityDTO>());
+            StateHasChanged();
+        }
+    }
+}

@@ -1,3 +1,4 @@
+using System.Globalization;
 using Backend.Data;
 using Backend.Models;
 using Backend.Repositories.Interfaces;
@@ -39,15 +40,8 @@ public class RequestRepository(SmartParkingContext context) : IRequestRepository
         var request = new Request
         {
             Email = requestDto.Email,
-            DatetimeStart = new DateTime(
-                DateTime.Now.Year,
-                DateTime.Now.Month,
-                DateTime.Now.Day,
-                DateTime.Now.Hour,
-                DateTime.Now.Minute,
-                DateTime.Now.Second
-            ),
-            DatetimeEnd = DateTime.Parse(requestDto.DatetimeEnd),
+            DatetimeStart = DateTime.Parse(requestDto.DatetimeStart, new CultureInfo("it-IT")),
+            DatetimeEnd = DateTime.Parse(requestDto.DatetimeEnd, new CultureInfo("it-IT")),
             SlotId = id
         };
 

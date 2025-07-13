@@ -49,7 +49,7 @@ public class FineService(IFineRepository repository)
         Fine? fine = await _repository.AddFineAsync(fineDTO);
 
         if (fine != null)
-            return FineResponse.Success([new FineEntityDTO(fine.Email, fine.DatetimeStart.ToString(), fine.DatetimeEnd.ToString(), fine.Kw, fine.Paid == true)]);
+            return FineResponse.Success([new FineEntityDTO(fine.Email, fine.DatetimeStart.ToString(), fine.DatetimeEnd.ToString(), fine.Paid == true)]);
 
         return FineResponse.Failed(FineResultEnum.Failed, "Fine not added");
     }
@@ -62,7 +62,7 @@ public class FineService(IFineRepository repository)
             return FineResponse.Failed(FineResultEnum.Failed, "Fines not found");
 
         return FineResponse.Success(
-            [.. fines.Select(f => new FineEntityDTO(f.Email, f.DatetimeStart.ToString(), f.DatetimeEnd.ToString(), f.Kw, f.Paid == true))]
+            [.. fines.Select(f => new FineEntityDTO(f.Email, f.DatetimeStart.ToString(), f.DatetimeEnd.ToString(), f.Paid == true))]
         );
     }
 
@@ -74,7 +74,7 @@ public class FineService(IFineRepository repository)
             return FineResponse.Failed(FineResultEnum.Failed, "Fines not found");
 
         return FineResponse.Success(
-            [.. fines.Select(f => new FineEntityDTO(f.Email, f.DatetimeStart.ToString(), f.DatetimeEnd.ToString(), f.Kw, f.Paid == true))]
+            [.. fines.Select(f => new FineEntityDTO(f.Email, f.DatetimeStart.ToString(), f.DatetimeEnd.ToString(), f.Paid == true))]
         );
     }
 
@@ -95,7 +95,6 @@ public class FineService(IFineRepository repository)
                 fine.Email,
                 fine.DatetimeStart.ToString(),
                 fine.DatetimeEnd.ToString(),
-                fine.Kw,
                 fine.Paid == true)
         ]);
     }
