@@ -148,6 +148,7 @@ public class RequestApi : IApiEndpoint
             NotFound<MessageDTO>,
             BadRequest<MessagesDTO>,
             Conflict<MessageDTO>,
+            ForbidHttpResult,
             ProblemHttpResult
         >
     > AddRequest(
@@ -173,6 +174,13 @@ public class RequestApi : IApiEndpoint
 
         if (response.Result == RequestResultEnum.RequestAlreadyExists && response.ErrorMessage != null)
             return TypedResults.Conflict(new MessageDTO(response.ErrorMessage));
+
+        if (response.Result == RequestResultEnum.Forbid && response.ErrorMessage != null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status403Forbidden,
+                title: "Add Request Failed",
+                detail: response.ErrorMessage
+            );
 
         if (!(response.Result == RequestResultEnum.Success && response.Requests != null && response.Requests.Length == 1))
             return TypedResults.Problem(

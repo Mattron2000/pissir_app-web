@@ -30,6 +30,8 @@ public class AdminRepository(SmartParkingContext context) : IAdminRepository
 
     public async Task<Request[]> GetRequestHistoryAsync()
     {
-        return await _context.Requests.ToArrayAsync();
+        return await _context.Requests
+            .Include(r => r.EmailNavigation)
+            .ToArrayAsync();
     }
 }

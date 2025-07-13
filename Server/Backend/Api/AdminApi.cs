@@ -139,16 +139,22 @@ public class AdminApi : IApiEndpoint
                 messages.AddRange([.. result.Errors.Select(e => e.ErrorMessage)]);
         }
 
-        if (date_start == null && date_end != null || date_start != null && date_end == null)
+        if (messages.Count > 0)
+            return TypedResults.BadRequest(new MessagesDTO([.. messages]));
+
+        if ((date_start == null || date_end == null) && (date_start != null || date_end != null))
             messages.Add("Both start and end dates must be provided or omitted together.");
 
-        if (date_start != null && date_end != null && DateTime.Parse(date_start) > DateTime.Parse(date_end))
+        if ((time_start == null || time_end == null) && (time_start != null || time_end != null))
+            messages.Add("Both start and end times must be provided or omitted together.");
+
+        if (date_start != null && date_end != null && DateOnly.Parse(date_start) > DateOnly.Parse(date_end))
             messages.Add("Start date must be before end date.");
 
-        if (time_start != null && time_end != null && DateTime.Parse(time_start) > DateTime.Parse(time_end))
+        if (time_start != null && time_end != null && TimeOnly.Parse(time_start) > TimeOnly.Parse(time_end))
             messages.Add("Start time must be before end time.");
 
-        if(messages.Count > 0)
+        if (messages.Count > 0)
             return TypedResults.BadRequest(new MessagesDTO([.. messages]));
 
         AdminResponse response = await service.SearchHistoryAsync(

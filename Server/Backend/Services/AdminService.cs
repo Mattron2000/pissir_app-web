@@ -17,13 +17,18 @@ public class AdminResponse
     public string? ErrorMessage { get; init; }
     public HistoryDTO[]? History { get; init; }
 
-    public static AdminResponse Success(
-        PriceDataDTO[] prices
-        ) =>
+    public static AdminResponse Success(PriceDataDTO[] prices) =>
         new()
         {
             Result = AdminResultEnum.Success,
             PricesData = prices
+        };
+
+    public static AdminResponse Success(HistoryDTO[] historyDTOs) =>
+        new()
+        {
+            Result = AdminResultEnum.Success,
+            History = historyDTOs
         };
 
     public static AdminResponse Failed(AdminResultEnum result = AdminResultEnum.Failed, string? reason = null) =>
@@ -39,15 +44,6 @@ public class AdminResponse
                 _ => null
             }
         };
-
-    internal static AdminResponse Success(HistoryDTO[] historyDTOs)
-    {
-        return new()
-        {
-            Result = AdminResultEnum.Success,
-            History = historyDTOs
-        };
-    }
 }
 
 public class AdminService(IAdminRepository repository)
@@ -80,46 +76,75 @@ public class AdminService(IAdminRepository repository)
 
         // SELECT email, type, datetime_start, datetime_end, kw, slot_id
         // FROM requests JOIN users USING (email)
-        // WHERE date(datetime_start) BETWEEN date_start AND date_end AND date(datetime_end) BETWEEN date_start AND date_end
+        // WHERE date(datetime_start) BETWEEN date_start AND date_end AND
+        //       date(datetime_end)   BETWEEN date_start AND date_end
         if (date_start != null && date_end != null)
+        {
+            DateTime start = DateTime.Parse(date_start);
+            DateTime end = DateTime.Parse(date_end);
+
             history = [.. history.Where(r =>
-                r.DatetimeStart.Date >= DateTime.Parse(date_start).Date &&
-                r.DatetimeStart.Date <= DateTime.Parse(date_end).Date &&
-                r.DatetimeEnd.Date   >= DateTime.Parse(date_start).Date &&
-                r.DatetimeEnd.Date   <= DateTime.Parse(date_end).Date
+                r.DatetimeStart.Date >= start.Date &&
+                r.DatetimeEnd.Date   <= end.Date
             )];
+        }
 
         // SELECT email, type, datetime_start, datetime_end, kw, slot_id
         // FROM requests JOIN users USING (email)
-        // WHERE (time(datetime_start) BETWEEN time(time_start) AND time(time_end) OR time(datetime_end) BETWEEN time(time_start) AND time(time_end))
+        // WHERE time(datetime_start) BETWEEN time(time_start) AND time(time_end) OR
+        //       time(datetime_end)   BETWEEN time(time_start) AND time(time_end)
         if (time_start != null && time_end != null)
+        {
+            TimeOnly start = TimeOnly.Parse(time_start);
+            TimeOnly end = TimeOnly.Parse(time_end);
+
             history = [.. history.Where(r =>
-                r.DatetimeStart.TimeOfDay >= DateTime.Parse(time_start).TimeOfDay &&
-                r.DatetimeStart.TimeOfDay <= DateTime.Parse(time_end).TimeOfDay &&
-                r.DatetimeEnd.TimeOfDay   >= DateTime.Parse(time_start).TimeOfDay &&
-                r.DatetimeEnd.TimeOfDay   <= DateTime.Parse(time_end).TimeOfDay
+                (TimeOnly.FromDateTime(r.DatetimeStart) >= start &&
+                TimeOnly.FromDateTime(r.DatetimeStart) <= end) ||
+                (TimeOnly.FromDateTime(r.DatetimeEnd)   >= start &&
+                TimeOnly.FromDateTime(r.DatetimeEnd)   <= end)
             )];
+        }
 
-        if(service_type != null)
-            if (service_type == "PARKING")
-                history = [.. history.Where(r => r.Kw == null)];
-            else
-                history = [.. history.Where(r => r.Kw != null)];
+        if (service_type != null)
+            switch (service_type)
+            {
+                case "PARKING":
+                    history = [.. history.Where(r => r.Kw == null)];
+                    break;
+                case "CHARGING":
+                    history = [.. history.Where(r => r.Kw != null)];
+                    break;
+            }
 
-        if(user_type != null)
-            history = [.. history.Where(r => r.EmailNavigation.Type == user_type)];
+        if (user_type != null)
+            switch (user_type)
+            {
+                case "BASE":
+                    history = [.. history.Where(r => r.EmailNavigation.Type == UsersTypeEnum.BASE.ToString())];
+                    break;
+                case "PREMIUM":
+                    history = [.. history.Where(r => r.EmailNavigation.Type == UsersTypeEnum.PREMIUM.ToString())];
+                    break;
+            }
+
+        if (history == null)
+            return AdminResponse.Failed(AdminResultEnum.Failed, "History is null");
+
+        if (history.Length == 0)
+            return AdminResponse.Success(Array.Empty<HistoryDTO>());
 
         return AdminResponse.Success(
-            history.Select(h => new HistoryDTO(
-                h.Email,
-                h.DatetimeStart.ToString(),
-                h.DatetimeEnd.ToString(),
-                h.Kw,
-                h.SlotId,
-                h.EmailNavigation.Type,
-                h.EmailNavigation.Name,
-                h.EmailNavigation.Surname
-            )).ToArray()
+            [.. history
+                .Select(r => new HistoryDTO(
+                    r.EmailNavigation.Type,
+                    r.DatetimeStart.ToString(),
+                    r.DatetimeEnd.ToString(),
+                    r.Kw,
+                    r.SlotId,
+                    r.EmailNavigation.Type
+                ))
+            ]
         );
     }
 

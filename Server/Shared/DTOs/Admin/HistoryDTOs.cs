@@ -6,7 +6,5 @@ public record HistoryDTO(
     string DatetimeEnd,
     int? Kw,
     int SlotId,
-    string Type,
-    string Name,
-    string Surname
+    string Type
 );

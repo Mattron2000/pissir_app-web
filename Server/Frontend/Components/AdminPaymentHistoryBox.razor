@@ -1,0 +1,165 @@
+@using Frontend.States
+@using Shared.DTOs.Request
+@using System.Text
+
+@inject AuthStateNotifier AuthStateNotifier
+@inject HttpClient Http
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary m-3" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+    Cronologia pagamenti
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+            </div>
+            <div class="modal-body container">
+                <div class="row">
+                    @* Date Start *@
+                    <span class="col">
+                        <label for="party">Data inizio:</label>
+                        <input type="date" @bind-value=startDate/>
+                    </span>
+
+                    @* Date End *@
+                    <span class="col">
+                        <label for="party">Data fine:</label>
+                        <input type="date" @bind-value=endDate/>
+                    </span>
+                </div>
+
+                <div class="row">
+                    @* Time start *@
+                    <span class="col">
+                        <label for="party">Ora inizio:</label>
+                        <input type="time" @bind-value=startTime/>
+                    </span>
+
+                    @* Time end *@
+                    <span class="col">
+                        <label for="party">Ora fine:</label>
+                        <input type="time" @bind-value=endTime/>
+                    </span>
+                </div>
+
+                <div class="row">
+                    @* Solo soste *@
+                    <span class="col">
+                        <label for="party">Solo soste:</label>
+                        <input type="checkbox" @bind-value=onlyStops/>
+                    </span>
+
+                    @* Solo ricariche *@
+                    <span class="col">
+                        <label for="party">Solo ricariche:</label>
+                        <input type="checkbox" @bind-value=onlyRecharges/>
+                    </span>
+                </div>
+
+                <div class="row">
+                    @* Solo base *@
+                    <span class="col">
+                        <label for="party">Solo base:</label>
+                        <input type="checkbox" @bind-value=onlyBase/>
+                    </span>
+
+                    @* Solo premium *@
+                    <span class="col">
+                        <label for="party">Solo premium:</label>
+                        <input type="checkbox" @bind-value=onlyPremium/>
+                    </span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="GetPaymentsHistory" data-bs-dismiss="modal">Cerca</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p><strong>Cronologia pagamenti verrà visualizzata qui dopo la ricerca.</strong></p>
+
+<table class="table table-bordered align-middle">
+    <thead class="table-light">
+        <tr>
+            <th scope="col">Email</th>
+            <th scope="col">Datetime Start</th>
+            <th scope="col">Datetime End</th>
+            <th scope="col">Kw</th>
+            <th scope="col">Slot Id</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        @if (PaymentsHistory.Count == 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center" />
+            </tr>
+        } else {
+            @foreach (var payment in PaymentsHistory)
+            {
+                <tr>
+                    <td>@payment.Email</td>
+                    <td>@payment.DatetimeStart</td>
+                    <td>@payment.DatetimeEnd</td>
+                    <td>@payment.Kw</td>
+                    <td>@payment.SlotId</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    protected override void OnInitialized() => AuthStateNotifier.Subscribe(StateHasChanged);
+    public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
+
+    private DateOnly? startDate;
+    private DateOnly? endDate;
+
+    private TimeOnly? startTime;
+    private TimeOnly? endTime;
+
+    private bool onlyStops;
+    private bool onlyRecharges;
+    private bool onlyBase;
+    private bool onlyPremium;
+
+    private List<RequestDTO> PaymentsHistory { get; set; } = new();
+
+    private async void GetPaymentsHistory()
+    {
+        @* Console.WriteLine("Fetching payment history with the following filters:");
+        Console.WriteLine($"Start Date: {startDate}, End Date: {endDate}");
+        Console.WriteLine($"Start Time: {startTime}, End Time: {endTime}");
+        Console.WriteLine($"Only Stops: {onlyStops}, Only Recharges: {onlyRecharges}");
+        Console.WriteLine($"Only Base: {onlyBase}, Only Premium: {onlyPremium}"); *@
+
+        StringBuilder queryBuilder = new();
+
+        if (startDate.HasValue) queryBuilder.Append($"&date_start={startDate.Value}");
+        if (endDate.HasValue)   queryBuilder.Append($"&date_end={endDate.Value}");
+        if (startTime.HasValue) queryBuilder.Append($"&time_start={startTime.Value}");
+        if (endTime.HasValue)   queryBuilder.Append($"&time_end={endTime.Value}");
+        if (onlyStops)          queryBuilder.Append("&service_type=PARKING");
+        if (onlyRecharges)      queryBuilder.Append("&service_type=CHARGING");
+        if (onlyBase)           queryBuilder.Append("&user_type=BASE");
+        if (onlyPremium)        queryBuilder.Append("&user_type=PREMIUM");
+
+        var response = await Http.GetFromJsonAsync<List<RequestDTO>>($"api/v1/admin/history?{queryBuilder.ToString().TrimStart('&')}");
+
+        if (response == null) {
+            Console.WriteLine("No payment history found or an error occurred.");
+            PaymentsHistory.Clear();
+            return;
+        }
+
+        PaymentsHistory = response;
+        StateHasChanged();
+    }
+}

@@ -195,6 +195,7 @@
         if (SelectedServiceType == ServiceType.PARKING)
             return new(
                 Email:          AuthState.User.Email,
+                DatetimeStart:  DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
                 DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
                 Percentage:     null,
                 PhoneNumber:    null
@@ -203,6 +204,7 @@
         if (PhoneNumber == string.Empty)
             return new(
                 Email:          AuthState.User.Email,
+                DatetimeStart:  DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
                 DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
                 Percentage:     Percentage,
                 PhoneNumber:    null
@@ -210,6 +212,7 @@
 
         return new(
             Email:          AuthState.User.Email,
+            DatetimeStart:  DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
             DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
             Percentage:     Percentage,
             PhoneNumber:    PhoneNumber

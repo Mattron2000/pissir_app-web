@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentValidation;
 using Shared.DTOs.Request;
 using Shared.FluentValidators.Properties;
@@ -12,13 +13,13 @@ public class NewRequestValidator : AbstractValidator<NewRequestDTO>
 
         RuleFor(x => x.DatetimeEnd)
             .NotEmpty().WithMessage("Datetime end is required.")
-            .Must(x => DateTime.TryParse(x, out _)).WithMessage("Datetime end must be greater than current datetime.");
+            .Must(x => DateTime.TryParse(x, new CultureInfo("it-IT"), DateTimeStyles.None, out _)).WithMessage("Datetime end must be greater than current datetime.");
 
         RuleFor(x => x.Percentage)
-            .GreaterThan(0).WithMessage("Percentage must be greater than 0.")
-            .LessThan(100).WithMessage("Percentage must be less than 100.");
+            .GreaterThanOrEqualTo(0).WithMessage("Percentage must be greater than or equal to 0.")
+            .LessThanOrEqualTo(100).WithMessage("Percentage must be less than or equal to 100.");
 
         RuleFor(x => x.PhoneNumber)
-            .Matches(@"^\d{10}$").WithMessage("Phone number must be 10 digits. (1234567890)");
+            .Matches(@"^(\d{10})?$").WithMessage("Phone number must be 10 digits or empty string. (1234567890 or '')");
     }
 }

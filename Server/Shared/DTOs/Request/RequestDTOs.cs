@@ -11,6 +11,7 @@ public record RequestDTO(
 
 public record NewRequestDTO(
     string Email,
+    string DatetimeStart,
     string DatetimeEnd,
     int? Percentage,
     string? PhoneNumber

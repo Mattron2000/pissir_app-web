@@ -9,7 +9,8 @@ public enum RequestResultEnum
     Success,
     Failed,
     UserNotFound,
-    RequestAlreadyExists
+    RequestAlreadyExists,
+    Forbid
 }
 
 public class RequestResponse
@@ -99,6 +100,9 @@ public class RequestService(IRequestRepository requestRepository, IUserRepositor
 
         if (user == null)
             return RequestResponse.Failed(RequestResultEnum.UserNotFound);
+
+        if (user.Type == UsersTypeEnum.ADMIN.ToString())
+            return RequestResponse.Failed(RequestResultEnum.Forbid, "The admin cannot make requests");
 
         var requests = await _requestRepository.GetRequestsAsync(requestDto.Email);
 
