@@ -13,4 +13,7 @@
     <FinesBox />
 </div>
 
-@code {}
+@if (AuthState.User.Type == "PREMIUM")
+{
+    <ReservationCreateBox />
+}

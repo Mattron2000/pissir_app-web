@@ -21,6 +21,7 @@ public class ReservationApi : IApiEndpoint
     {
         reservationApi.MapPost("/", CreateReservation);
         reservationApi.MapGet("/{email}", GetUserReservations);
+        reservationApi.MapDelete("/", DeleteReservation);
     }
 
     private async Task<
@@ -63,8 +64,6 @@ public class ReservationApi : IApiEndpoint
                 statusCode: StatusCodes.Status403Forbidden,
                 title: "Reservation Creation Forbidden for non-premium users"
             );
-
-        // TODO: check if slot id exists
 
         ReservationResponse response = await reservationService.CreateReservationAsync(reservation);
 
@@ -142,6 +141,68 @@ public class ReservationApi : IApiEndpoint
         return TypedResults.Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
                 title: "User Reservations Failed",
+                detail: response.ErrorMessage
+            );
+    }
+
+    private async Task<
+        Results<
+            BadRequest<MessagesDTO>,
+            NotFound<MessageDTO>,
+            NoContent,
+            ProblemHttpResult
+        >
+    > DeleteReservation(
+        string email,
+        DateTime datetime,
+        UserService userService,
+        ReservationService reservationService,
+        EmailValidator validator)
+    {
+        var result = await validator.ValidateAsync(email);
+
+        if (!result.IsValid)
+            return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
+
+        Console.WriteLine($"email: {email}");
+        Console.WriteLine($"datetimeStart: {datetime}");
+
+        UserResponse userResponse = await userService.GetUserByEmailAsync(email);
+
+        if (userResponse == null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Delete Reservation Failed: user response is null"
+            );
+
+        if (userResponse.Result == UserResultEnum.UserNotFound && userResponse.ErrorMessage != null)
+            return TypedResults.NotFound(new MessageDTO(userResponse.ErrorMessage));
+
+        if (userResponse.Result == UserResultEnum.Success &&
+                userResponse.User != null &&
+                userResponse.User.Type != UsersTypeEnum.PREMIUM.ToString())
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status403Forbidden,
+                title: "Delete Reservation Forbidden for non-premium users"
+            );
+
+        ReservationResponse response = await reservationService.DeleteReservationAsync(email, datetime);
+
+        if (response == null)
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Delete Reservation Failed: reservation response is null"
+            );
+
+        if (response.Result == ReservationResultEnum.Success)
+            return TypedResults.NoContent();
+
+        if (response.Result == ReservationResultEnum.NotFound && response.ErrorMessage != null)
+            return TypedResults.NotFound(new MessageDTO(response.ErrorMessage));
+
+        return TypedResults.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Delete Reservation Failed",
                 detail: response.ErrorMessage
             );
     }

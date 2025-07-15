@@ -10,7 +10,7 @@ public record ReservationEntityDTO(
 public record class ReservationCreateDTO()
 {
     public string Email { get; set; } = string.Empty;
-    public int SlotId { get; set; }
+    public int SlotId { get; set; } = 0;
     public DateTime DatetimeStart { get; set; }
     public DateTime DatetimeEnd { get; set; }
 }

@@ -9,9 +9,9 @@ public class ReservationValidator : AbstractValidator<ReservationCreateDTO>
     public ReservationValidator()
     {
         RuleFor(x => x.Email).SetValidator(new EmailValidator());
+
         RuleFor(x => x.SlotId)
-            .NotEmpty().WithMessage("Slot Id is required.")
-            .GreaterThan(0).WithMessage("Slot Id must be greater than 0.");
+            .GreaterThanOrEqualTo(0).WithMessage("Slot Id must be greater than 0.");
 
         RuleFor(x => x.DatetimeStart)
             .NotEmpty().WithMessage("Datetime start is required.")

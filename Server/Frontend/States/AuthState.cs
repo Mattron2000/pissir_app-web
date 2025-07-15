@@ -10,6 +10,10 @@ public class AuthState(AuthStateNotifier notifier)
     public void SetUser(UserEntityDTO? user)
     {
         User = user;
-        _notifier.Notify();
+        try {
+            _notifier.Notify();
+        } catch (Exception ex) {
+            Console.WriteLine(ex.GetType().Name + ": " + ex.Message);
+        }
     }
 }

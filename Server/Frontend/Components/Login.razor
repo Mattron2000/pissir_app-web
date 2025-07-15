@@ -9,25 +9,25 @@
 
 @if (AuthState.User == null)
 {
-<h3>@Title</h3>
+    <h3>@Title</h3>
 
-<CascadingValue Value="errorModel">
-    <MessageBox OnCloseCallBack="OnCloseMessageBox" />
-</CascadingValue>
+    <CascadingValue Value="errorModel">
+        <MessageBox />
+    </CascadingValue>
 
-<EditForm Model="@loginUser" OnSubmit="HandleLoginSubmit">
-    <div class="mb-3 max-width-item">
-        <label for="email" class="form-label">Email:</label>
-        <InputText class="form-control" @bind-Value="loginUser.Email" />
-    </div>
+    <EditForm Model="@loginUser" OnSubmit="HandleLoginSubmit">
+        <div class="mb-3 max-width-item">
+            <label for="email" class="form-label">Email:</label>
+            <InputText class="form-control" @bind-Value="loginUser.Email" />
+        </div>
 
-    <div class="mb-3 max-width-item">
-        <label for="password" class="form-label">Password:</label>
-        <InputText class="form-control" type="password"  @bind-Value="loginUser.Password" />
-    </div>
+        <div class="mb-3 max-width-item">
+            <label for="password" class="form-label">Password:</label>
+            <InputText class="form-control" type="password"  @bind-Value="loginUser.Password" />
+        </div>
 
-    <button type="submit" class="btn btn-primary">Login</button>
-</EditForm>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </EditForm>
 }
 
 @code {
@@ -39,20 +39,9 @@
     private readonly string Title = "Login";
 
 
-    protected override void OnInitialized()
-    {
-        AuthStateNotifier.Subscribe(StateHasChanged);
-        errorModel.Reset();
-    }
+    protected override void OnInitialized() => AuthStateNotifier.Subscribe(() => InvokeAsync(StateHasChanged));
 
-    public void Dispose()
-    {
-        AuthStateNotifier.Unsubscribe(StateHasChanged);
-    }
-
-    private void OnCloseMessageBox()
-    {
-    }
+    public void Dispose() => AuthStateNotifier.Unsubscribe(() => InvokeAsync(StateHasChanged));
 
     private async void HandleLoginSubmit()
     {
@@ -69,10 +58,12 @@
             return;
         }
 
-        AuthState.SetUser(await response.Content.ReadFromJsonAsync<UserEntityDTO>());
-        AuthStateNotifier.Notify();
+        var user = await response.Content.ReadFromJsonAsync<UserEntityDTO>();
 
-        await OnClickCallback.InvokeAsync(true);
+        AuthState.SetUser(user);
+
+        if (OnClickCallback.HasDelegate)
+            await OnClickCallback.InvokeAsync(true);
     }
 
     private bool ValidateUserDataInput()

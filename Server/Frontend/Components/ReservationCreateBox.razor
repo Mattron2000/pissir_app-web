@@ -1,0 +1,176 @@
+@using Frontend.States
+@using Shared.DTOs.Reservation
+@using System.Web
+@using static Frontend.Components.MessageBox
+
+@inject AuthState AuthState
+@inject HttpClient Http
+
+<CascadingValue Value="messageModel">
+    <MessageBox />
+</CascadingValue>
+
+<button type="button" class="btn btn-primary m-3" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="height: fit-content;">
+    Crea Prenotazione
+</button>
+
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+            </div>
+            <div class="modal-body container">
+                <div class="row">
+                    @* Date Start *@
+                    <span class="col">
+                        <label for="party">Data inizio:</label>
+                        <input type="datetime-local" @bind-value=start/>
+                    </span>
+
+                    @* Date End *@
+                    <span class="col">
+                        <label for="party">Data fine:</label>
+                        <input type="datetime-local" @bind-value=end/>
+                    </span>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="CreateReservation" data-bs-dismiss="modal">Crea</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="m-3">
+    <p><strong>Lista delle prenotazioni.</strong></p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>SlotId</th>
+                <th />
+            </tr>
+        </thead>
+        <tbody>
+        @if (reservations != null && reservations.Any())
+        {
+            @foreach (var reservation in reservations)
+            {
+                <tr>
+                    <td>@reservation.Email</td>
+                    <td>@(reservation.DatetimeStart.ToString("yyyy-MM-dd HH:mm"))</td>
+                    <td>@(reservation.DatetimeEnd.ToString("yyyy-MM-dd HH:mm"))</td>
+                    <td>@(reservation.SlotId)</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteReservationAsync(reservation.Email, reservation.DatetimeStart)">Delete</button>
+                    </td>
+                </tr>
+            }
+        } else {
+            <p>No reservation available.</p>
+        }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    protected override void OnInitialized() => GetReservations();
+
+    MessageBoxModel messageModel = new MessageBoxModel();
+
+    private DateTime? start;
+    private DateTime? end;
+
+    private List<ReservationEntityDTO> reservations = new();
+
+    private async void CreateReservation() {
+        if (start == null) return;
+        if (end == null) return;
+        if (AuthState.User == null) return;
+
+        var response = await Http.PostAsJsonAsync("api/v1/reservations", new ReservationCreateDTO{
+            Email = AuthState.User.Email,
+            SlotId = 0,
+            DatetimeStart = start.Value,
+            DatetimeEnd = end.Value
+        });
+
+        if (!response.IsSuccessStatusCode) {
+            switch(response.StatusCode) {
+                case System.Net.HttpStatusCode.BadRequest:
+                    SetMessageBox(
+                        response.StatusCode.ToString(),
+                        "Please respect the validator suggestions",
+                        reasons: (await response.Content.ReadFromJsonAsync<MessagesDTO>())?.Messages
+                    );
+                break;
+                case System.Net.HttpStatusCode.NotFound:
+                    SetMessageBox(response.StatusCode.ToString(),
+                        (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "An error occurred while trying to create the reservation. Please try again later."
+                    );
+                break;
+            }
+
+            return;
+        }
+
+        var reservation = await response.Content.ReadFromJsonAsync<ReservationEntityDTO>();
+
+        if (reservation == null) {
+            SetMessageBox("Errore nella creazione della prenotazione");
+            return;
+        }
+
+        SetMessageBox("Prenotazione creata",
+            type: MessageType.Success,
+            reasons: [
+                "Email: " + reservation.Email,
+                "SlotId: " + reservation.SlotId,
+                "DatetimeStart: " + reservation.DatetimeStart,
+                "DatetimeEnd: " + reservation.DatetimeEnd
+            ]);
+
+        GetReservations();
+    }
+
+    private async void GetReservations() {
+        if (AuthState.User == null) return;
+
+        var response = await Http.GetFromJsonAsync<List<ReservationEntityDTO>>("api/v1/reservations/" + AuthState.User.Email);
+        if (response == null) return;
+
+        reservations = response;
+        StateHasChanged();
+    }
+
+    private async void DeleteReservationAsync(string email, DateTime datetimeStart) {
+        var response = await Http.DeleteAsync($"api/v1/reservations?email={email}&datetime={datetimeStart}");
+
+        if (!response.IsSuccessStatusCode) {
+            SetMessageBox("Error", "An error occurred while trying to delete the reservation. Please try again later.");
+            return;
+        }
+
+        messageModel.Reset();
+        GetReservations();
+    }
+
+    private void SetMessageBox(
+            string title,
+            string body = "",
+            MessageType type = MessageType.Warning,
+            string[]? reasons = null,
+            bool hasSubmitButton = false,
+            bool isVisible = true,
+            string? SubmitMessage = null)
+    {
+        messageModel.SetMessageBox(title, body, type, reasons, hasSubmitButton, isVisible, SubmitMessage);
+        StateHasChanged();
+    }
+}
