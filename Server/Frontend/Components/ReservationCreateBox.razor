@@ -50,7 +50,6 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Email</th>
                 <th>Start Date</th>
                 <th>End Date</th>
                 <th>SlotId</th>
@@ -63,7 +62,6 @@
             @foreach (var reservation in reservations)
             {
                 <tr>
-                    <td>@reservation.Email</td>
                     <td>@(reservation.DatetimeStart.ToString("yyyy-MM-dd HH:mm"))</td>
                     <td>@(reservation.DatetimeEnd.ToString("yyyy-MM-dd HH:mm"))</td>
                     <td>@(reservation.SlotId)</td>

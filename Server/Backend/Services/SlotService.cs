@@ -8,7 +8,8 @@ namespace Backend.Services;
 public enum SlotResultEnum
 {
     Success,
-    Failed
+    Failed,
+    NotFound
 }
 
 public class SlotResponse
@@ -31,6 +32,7 @@ public class SlotResponse
             ErrorMessage = reason ?? result switch
             {
                 SlotResultEnum.Failed => "Failed",
+                SlotResultEnum.NotFound => "Slot not found",
                 _ => null
             }
         };
@@ -50,5 +52,33 @@ public class SlotService(ISlotRepository slotRepository)
         return SlotResponse.Success(
             [.. Slots.Select(s => new SlotEntityDTO(s.Id, s.Status))]
         );
+    }
+
+    internal async Task<SlotResponse> UpdateSlotAsync(int slotId, string? status = null)
+    {
+        Slot[]? Slots = await _slotRepository.GetSlotsAsync();
+
+        if (Slots == null)
+            return SlotResponse.Failed();
+
+        Slot? slot = Slots.FirstOrDefault(s => s.Id == slotId);
+
+        if (slot == null)
+            return SlotResponse.Failed(SlotResultEnum.NotFound);
+
+        if (status != null)
+            slot.Status = status;
+        else
+            if (slot.Status == SlotsStatusEnum.FREE.ToString())
+                slot.Status = SlotsStatusEnum.OCCUPIED.ToString();
+            else
+                slot.Status = SlotsStatusEnum.FREE.ToString();
+
+        if (await _slotRepository.UpdateSlotAsync(slot))
+            return SlotResponse.Success(
+                [new SlotEntityDTO(slot.Id, slot.Status)]
+            );
+
+        return SlotResponse.Failed();
     }
 }

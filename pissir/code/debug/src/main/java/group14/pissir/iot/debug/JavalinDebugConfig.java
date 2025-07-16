@@ -14,8 +14,8 @@ public class JavalinDebugConfig {
 		return config -> {
 			// config.staticFiles.add("/public"); // when the debug website is completed
 			config.staticFiles.add(staticFiles -> { // for faster development html/js-side
-				// staticFiles.directory = "./code/debug/src/main/resources/public"; // DEBUG
-				staticFiles.directory = "src/main/resources/public";
+				staticFiles.directory = "./debug/src/main/resources/public"; // DEBUG
+				// staticFiles.directory = "src/main/resources/public";
 				staticFiles.location = Location.EXTERNAL;
 			});
 			config.router.apiBuilder(() -> {

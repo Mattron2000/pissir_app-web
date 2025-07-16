@@ -40,7 +40,6 @@
 
 
     protected override void OnInitialized() => AuthStateNotifier.Subscribe(() => InvokeAsync(StateHasChanged));
-
     public void Dispose() => AuthStateNotifier.Unsubscribe(() => InvokeAsync(StateHasChanged));
 
     private async void HandleLoginSubmit()

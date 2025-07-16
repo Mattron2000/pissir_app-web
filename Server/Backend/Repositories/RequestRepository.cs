@@ -64,4 +64,11 @@ public class RequestRepository(SmartParkingContext context) : IRequestRepository
 
         return request;
     }
+
+    public Task SetKwToRequestBySlotIdAsync(int slotId, int kw)
+    {
+        var request = _context.Requests.First(r => r.SlotId == slotId && r.Paid == false);
+        request.Kw = kw;
+        return _context.SaveChangesAsync();
+    }
 }

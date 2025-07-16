@@ -1,6 +1,7 @@
 @using Frontend.States
 
 @inject AuthState AuthState
+@inject AuthStateNotifier AuthStateNotifier
 
 @if (AuthState.User == null)
 {
@@ -16,4 +17,9 @@
 @if (AuthState.User.Type == "PREMIUM")
 {
     <ReservationCreateBox />
+}
+
+@code {
+    protected override void OnInitialized() => AuthStateNotifier.Subscribe(StateHasChanged);
+    public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
 }

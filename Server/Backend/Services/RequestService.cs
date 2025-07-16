@@ -1,5 +1,6 @@
 using Backend.Models;
 using Backend.Repositories.Interfaces;
+using Shared.DTOs.MQTT;
 using Shared.DTOs.Request;
 
 namespace Backend.Services;
@@ -94,7 +95,7 @@ public class RequestService(IRequestRepository requestRepository, IUserRepositor
         )]);
     }
 
-    internal async Task<RequestResponse> AddRequestAsync(NewRequestDTO requestDto)
+    internal async Task<RequestResponse> AddRequestAsync(NewRequestDTO requestDto, string? slot_id)
     {
         var user = await _userRepository.GetUserByEmailAsync(requestDto.Email);
 
@@ -112,12 +113,18 @@ public class RequestService(IRequestRepository requestRepository, IUserRepositor
 
         Slot[] slots = await _slotRepository.GetSlotsAsync();
 
-        slots = [.. slots.Where(s => s.Status == SlotsStatusEnum.FREE.ToString())];
+        Slot selectedSlot;
 
-        if (slots.Length == 0)
-            return RequestResponse.Failed(RequestResultEnum.Failed, "No free slots");
+        if (slot_id != null)
+            selectedSlot = slots.First(s => s.Id == int.Parse(slot_id));
+        else {
+            slots = [.. slots.Where(s => s.Status == SlotsStatusEnum.FREE.ToString())];
 
-        Slot selectedSlot = slots[new Random().Next(slots.Length)];
+            if (slots.Length == 0)
+                return RequestResponse.Failed(RequestResultEnum.Failed, "No free slots");
+
+            selectedSlot = slots[new Random().Next(slots.Length)];
+        }
 
         Request request = await _requestRepository.AddRequestAsync(requestDto, selectedSlot.Id);
 
@@ -151,5 +158,12 @@ public class RequestService(IRequestRepository requestRepository, IUserRepositor
             request.Paid,
             request.SlotId
         )]);
+    }
+
+    internal async Task HandleMWbotAck(MWbotResponse ack)
+    {
+        Console.WriteLine($"Received MWbot ack: slot_id = {ack.SlotId}, kw = {ack.Kw}");
+
+        await _requestRepository.SetKwToRequestBySlotIdAsync(ack.SlotId, ack.Kw);
     }
 }

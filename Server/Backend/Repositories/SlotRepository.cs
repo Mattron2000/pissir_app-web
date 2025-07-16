@@ -13,4 +13,14 @@ public class SlotRepository(SmartParkingContext context) : ISlotRepository
     {
         return await _context.Slots.ToArrayAsync();
     }
+
+    public async Task<bool> UpdateSlotAsync(Slot slot)
+    {
+        Slot? slotToUpdate = await _context.Slots.FirstOrDefaultAsync(s => s.Id == slot.Id);
+
+        if (slotToUpdate != null)
+            slotToUpdate.Status = slot.Status;
+
+        return await _context.SaveChangesAsync() == 1;
+    }
 }

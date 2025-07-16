@@ -152,6 +152,7 @@ public class RequestApi : IApiEndpoint
             ProblemHttpResult
         >
     > AddRequest(
+        string? slot_id,
         NewRequestDTO requestDto,
         RequestService service,
         IValidator<NewRequestDTO> validator)
@@ -161,7 +162,7 @@ public class RequestApi : IApiEndpoint
         if (!result.IsValid)
             return TypedResults.BadRequest(new MessagesDTO([.. result.Errors.Select(e => e.ErrorMessage)]));
 
-        RequestResponse response = await service.AddRequestAsync(requestDto);
+        RequestResponse response = await service.AddRequestAsync(requestDto, slot_id);
 
         if (response == null)
             return TypedResults.Problem(
@@ -187,8 +188,6 @@ public class RequestApi : IApiEndpoint
                 statusCode: StatusCodes.Status500InternalServerError,
                 title: "Add Request Failed"
             );
-
-        // TODO: send mqtt message to broker [int? Percentage, string? PhoneNumber]
 
         return TypedResults.Created("/api/v1/requests", response.Requests[0]);
     }

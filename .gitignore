@@ -484,6 +484,5 @@ $RECYCLE.BIN/
 *.swp
 
 # My Ignore
-Temp/
 Server/Backend/DB/SmartParking.db-shm
 Server/Backend/DB/SmartParking.db-wal

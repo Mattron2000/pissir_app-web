@@ -1,6 +1,9 @@
 @using System.Text.RegularExpressions
 @using Frontend.States
+@using MQTTnet
+@using Shared.DTOs.MQTT
 @using Shared.DTOs.Request
+@using System.Text.Json
 @using static Frontend.Components.MessageBox
 
 @inject AuthState AuthState
@@ -60,8 +63,7 @@
 
     private void HandleSelectServiceSubmit(ServiceType selectedServiceType)
     {
-        if (SelectedServiceType == selectedServiceType)
-            return;
+        if (SelectedServiceType == selectedServiceType) return;
 
         Percentage = 50;
         PhoneNumber = string.Empty;
@@ -86,7 +88,7 @@
 
         if (requestForm == null) return;
 
-        HttpResponseMessage response = await Http.PostAsJsonAsync("api/v1/requests", requestForm);
+        var response = await Http.PostAsJsonAsync("api/v1/requests?slot=0", requestForm);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -128,21 +130,49 @@
 
         string[] requestReasons;
 
-        if (SelectedServiceType == ServiceType.PARKING)
-            requestReasons = [
-                "Email: " +             request.Email,
-                "Datetime start: " +    DateTime.Parse(request.DatetimeStart).ToString("yyyy-MM-dd HH:mm"),
-                "Datetime end: " +      DateTime.Parse(request.DatetimeEnd).ToString("yyyy-MM-dd HH:mm"),
-                "Slot ID: " +           request.SlotId,
-            ];
-        else
-            requestReasons = [
-                "Email: " +             request.Email,
-                "Datetime start: " +    DateTime.Parse(request.DatetimeStart).ToString("yyyy-MM-dd HH:mm"),
-                "Datetime end: " +      DateTime.Parse(request.DatetimeEnd).ToString("yyyy-MM-dd HH:mm"),
-                "Kw: " +                request.Kw,
-                "Slot ID: " +           request.SlotId,
-            ];
+        requestReasons = [
+            "Email: " +             request.Email,
+            "Datetime start: " +    DateTime.Parse(request.DatetimeStart).ToString("yyyy-MM-dd HH:mm"),
+            "Datetime end: " +      DateTime.Parse(request.DatetimeEnd).ToString("yyyy-MM-dd HH:mm"),
+            "Slot ID: " +           request.SlotId,
+        ];
+
+        if (SelectedServiceType == ServiceType.CHARGING) {
+            Console.WriteLine("Sending MQTT message");
+
+            var mqttFactory = new MqttClientFactory();
+            var mqttClient = mqttFactory.CreateMqttClient();
+
+            var mqttClientOptions = new MqttClientOptionsBuilder()
+                .WithWebSocketServer(o => o.WithUri("ws://localhost:9001"))
+                .WithClientId("frontend")
+                .WithCredentials("frontend", "frontend")
+                .WithCleanSession()
+                .Build();
+
+            MqttClientConnectResult mqttConnect;
+            try {
+                mqttConnect = await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+            } catch (Exception ex) {
+                Console.WriteLine("Warning: [" + ex.GetType().Name + "] The MQTT client connection failed: " + ex.Message);
+                return;
+            }
+
+            var mwbotRequest = new MWbotRequest {
+                SlotId = request.SlotId,
+                Percentage = Percentage,
+                PhoneNumber = PhoneNumber
+            };
+
+            string json = JsonSerializer.Serialize<MWbotRequest>(mwbotRequest);
+
+            Console.WriteLine(json);
+
+            await mqttClient.PublishAsync(new MqttApplicationMessageBuilder()
+                .WithTopic("iot/mwbot/new_request")
+                .WithPayload(json)
+                .Build());
+        }
 
         SetMessageBox(
             response.StatusCode.ToString(),
@@ -164,7 +194,7 @@
         if (ParkingDuration <= 0)
             reasons.Add("Please insert a valid parking duration");
 
-        if (Percentage <= 0 || Percentage > 100)
+        if (Percentage < 0 || Percentage > 100)
             reasons.Add("Please insert a valid percentage");
 
         if (PhoneNumber != string.Empty && !PhoneNumberRegex.IsMatch(PhoneNumber))
@@ -192,30 +222,12 @@
             return null;
         }
 
-        if (SelectedServiceType == ServiceType.PARKING)
-            return new(
-                Email:          AuthState.User.Email,
-                DatetimeStart:  DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
-                DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
-                Percentage:     null,
-                PhoneNumber:    null
-            );
-
-        if (PhoneNumber == string.Empty)
-            return new(
-                Email:          AuthState.User.Email,
-                DatetimeStart:  DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
-                DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
-                Percentage:     Percentage,
-                PhoneNumber:    null
-            );
-
         return new(
             Email:          AuthState.User.Email,
             DatetimeStart:  DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
             DatetimeEnd:    DateTime.Now.AddMinutes(ParkingDuration).ToString("yyyy-MM-dd HH:mm"),
-            Percentage:     Percentage,
-            PhoneNumber:    PhoneNumber
+            Percentage:     null,
+            PhoneNumber:    null
         );
     }
 

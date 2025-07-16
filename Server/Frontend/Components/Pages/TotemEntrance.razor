@@ -2,7 +2,10 @@
 @rendermode InteractiveWebAssembly
 
 @using Frontend.States
+@using Shared.DTOs.Fine
 @using Shared.DTOs.Request
+@using Shared.DTOs.Reservation
+@using Shared.DTOs.User
 @using static Frontend.Components.MessageBox
 
 @inject AuthState AuthState
@@ -22,17 +25,17 @@
 
 <PriceBox />
 
-@if (AuthState.User == null)
-{
-    <LoginAndRegisterBox OnClickLoginCallback="OnSuccessfulLogin" />
-    return;
-}
-
 <div class="mb-3" />
 
 <CascadingValue Value="RequestModel">
     <MessageBox OnSubmitCallBack="OnCloseMessageBox"/>
 </CascadingValue>
+
+@if (AuthState.User == null)
+{
+    <LoginAndRegisterBox OnClickLoginCallback="OnSuccessfulLogin" />
+    return;
+}
 
 @if (!isOkContinueToCreateRequestForm) return;
 
@@ -45,7 +48,12 @@
 
     private bool isOkContinueToCreateRequestForm = false;
 
-    protected override void OnInitialized() => AuthStateNotifier.Subscribe(StateHasChanged);
+    protected override void OnInitialized() {
+        AuthStateNotifier.Subscribe(StateHasChanged);
+
+        CheckUserReservation();
+    }
+
     public void Dispose() => AuthStateNotifier.Unsubscribe(StateHasChanged);
 
     private async void OnSuccessfulLogin() {
@@ -62,10 +70,92 @@
             return;
         }
 
-        // TODO: check reservation for PREMIUM users (backup in Temp4)
-
         isOkContinueToCreateRequestForm = true;
+
+        if (AuthState.User.Type == "ADMIN") {
+            SetMessageBox(
+                "Forbidden",
+                "Administrator cannot enter in parking slot.",
+                hasSubmitButton: true,
+                SubmitMessage: "Logout"
+            );
+            isOkContinueToCreateRequestForm = false;
+            return;
+        }
+
+        if(AuthState.User?.Type == "PREMIUM") CheckUserReservation();
+
         StateHasChanged();
+    }
+
+    private async void CheckUserReservation()
+    {
+        if (AuthState.User == null) return;
+
+        if (AuthState.User?.Email == null) return;
+
+        var reservations  = await Http.GetFromJsonAsync<List<ReservationEntityDTO>>("api/v1/reservations/" + AuthState.User.Email);
+
+        if (reservations == null) return;
+
+        var expiredReservations = reservations.Where(r => r.DatetimeStart < DateTime.Now && DateTime.Now - r.DatetimeStart > TimeSpan.FromMinutes(15));
+
+        if (expiredReservations.Count() > 0) {
+            foreach (var r in expiredReservations) {
+                await Http.DeleteAsync("api/v1/reservations?email=" + AuthState.User.Email + "&datetime=" + r.DatetimeStart.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                var fine = await Http.PostAsJsonAsync("api/v1/fines", new FineNewDTO {
+                    Email = r.Email,
+                    DatetimeStart = r.DatetimeStart.ToString("yyyy-MM-dd HH:mm"),
+                    DatetimeEnd = r.DatetimeEnd.ToString("yyyy-MM-dd HH:mm")
+                });
+
+                if (!fine.IsSuccessStatusCode) Console.WriteLine("Failed to create fine");
+            }
+        }
+
+        ReservationEntityDTO? reservation = reservations.FirstOrDefault(r => r.DatetimeStart - DateTime.Now <= TimeSpan.FromMinutes(15));
+
+        if (reservation == null) return;
+
+        await Http.DeleteAsync("api/v1/reservations?email=" + AuthState.User.Email + "&datetime=" + reservation.DatetimeStart.ToString("yyyy-MM-dd HH:mm:ss"));
+
+        NewRequestDTO request = new(
+            reservation.Email,
+            reservation.DatetimeStart.ToString("yyyy-MM-dd HH:mm"),
+            reservation.DatetimeEnd.ToString("yyyy-MM-dd HH:mm"),
+            0,
+            ""
+        );
+
+        // create request
+        var response = await Http.PostAsJsonAsync("api/v1/requests?slot=" + reservation.SlotId, request);
+
+        if (!response.IsSuccessStatusCode) {
+            SetMessageBox(
+                "Error",
+                (await response.Content.ReadFromJsonAsync<MessageDTO>())?.Message ?? "An error occurred while trying to convert the reservation to a request. Please try again later."
+            );
+            isOkContinueToCreateRequestForm = false;
+            return;
+        }
+
+        var requestEntity = await response.Content.ReadFromJsonAsync<RequestDTO>();
+        if (requestEntity == null) return;
+
+        SetMessageBox(
+            "Request created",
+            type: MessageType.Success,
+            reasons: [
+                "Email: " + request.Email,
+                "SlotId: " + requestEntity.SlotId,
+                "DatetimeStart: " + request.DatetimeStart,
+                "DatetimeEnd: " + request.DatetimeEnd
+            ],
+            hasSubmitButton: true,
+            SubmitMessage: "Logout"
+        );
+        isOkContinueToCreateRequestForm = false;
     }
 
     private void OnCloseMessageBox() {

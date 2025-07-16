@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using Backend.Api;
 using Backend.Components;
 using Backend.Data;
@@ -10,7 +12,9 @@ using Frontend.States;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using MQTTnet;
 using Shared.DTOs.Fine;
+using Shared.DTOs.MQTT;
 using Shared.DTOs.Request;
 using Shared.DTOs.Reservation;
 using Shared.DTOs.User;
@@ -166,5 +170,68 @@ IEnumerable<IApiEndpoint> apiEndpoints = typeof(Program).Assembly
     .Cast<IApiEndpoint>();
 
 foreach (IApiEndpoint endpoint in apiEndpoints) endpoint.MapEndpoints(app);
+
+var mqttFactory = new MqttClientFactory();
+var mqttClient = mqttFactory.CreateMqttClient();
+
+var mqttClientOptions = new MqttClientOptionsBuilder()
+    .WithTcpServer("localhost", 1883)
+    .WithClientId("backend")
+    .WithCredentials("backend", "backend")
+    .WithCleanSession()
+    .Build();
+
+MqttClientConnectResult mqttConnect;
+try {
+    mqttConnect = await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+} catch (Exception ex) {
+    Console.WriteLine("Warning: [" + ex.GetType().Name + "] The MQTT client connection failed: " + ex.Message);
+    return;
+}
+
+await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+    .WithTopic("iot/sensors/+/status")
+    .Build());
+
+await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+    .WithTopic("iot/mwbot/ack")
+    .Build());
+
+mqttClient.ApplicationMessageReceivedAsync += HandleBackendMqttMessage;
+
+async Task HandleBackendMqttMessage(MqttApplicationMessageReceivedEventArgs e)
+{
+    var topic = e.ApplicationMessage.Topic;
+    var message = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+    Console.WriteLine($"Received message on topic {topic}: {message}");
+
+    if (topic.StartsWith("iot/sensors/") && topic.EndsWith("/status"))
+    {
+        SensorData? sensorData = JsonSerializer.Deserialize<SensorData>(message);
+        if (sensorData == null) return;
+
+        Console.WriteLine($"Sensor {sensorData.SlotId}, status: {sensorData.Status}");
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var slotService = scope.ServiceProvider.GetRequiredService<SlotService>();
+            await slotService.UpdateSlotAsync(sensorData.SlotId, sensorData.Status);
+        }
+
+        return;
+    }
+
+    if (topic.Equals("iot/mwbot/ack"))
+    {
+        MWbotResponse? response = JsonSerializer.Deserialize<MWbotResponse>(message);
+        if (response == null) return;
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var reservationService = scope.ServiceProvider.GetRequiredService<RequestService>();
+            await reservationService.HandleMWbotAck(response);
+        }
+    }
+}
 
 app.Run();

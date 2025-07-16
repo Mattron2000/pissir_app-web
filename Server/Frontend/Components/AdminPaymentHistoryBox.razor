@@ -105,8 +105,8 @@
             {
                 <tr>
                     <td>@payment.Email</td>
-                    <td>@payment.DatetimeStart</td>
-                    <td>@payment.DatetimeEnd</td>
+                    <td>@(DateTime.Parse(payment.DatetimeStart).ToString("yyyy-MM-dd HH:mm"))</td>
+                    <td>@(DateTime.Parse(payment.DatetimeEnd).ToString("yyyy-MM-dd HH:mm"))</td>
                     <td>@payment.Kw</td>
                     <td>@payment.SlotId</td>
                 </tr>

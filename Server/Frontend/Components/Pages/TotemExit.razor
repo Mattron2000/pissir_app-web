@@ -2,6 +2,7 @@
 @rendermode InteractiveWebAssembly
 
 @using Frontend.States
+@using Shared.DTOs.Fine
 @using Shared.DTOs.Request
 @using static Frontend.Components.MessageBox
 
@@ -72,8 +73,6 @@
             return;
         }
 
-        // TODO: Check if the request is within the time tolerance
-
         Request = requests.First();
 
         var reasons = new List<string> {
@@ -86,13 +85,30 @@
         if (Request.Kw.HasValue || Request.Kw >= 0)
             reasons.Add($"Kw: {Request.Kw.Value}");
 
-        SetMessageBox(
-            "Request Details",
-            type: MessageType.Success,
-            reasons: reasons.ToArray(),
-            hasSubmitButton: true,
-            SubmitMessage: "Pay Request Now and Exit"
+        TimeSpan timeDifference;
+
+        if (DateTime.Parse(Request.DatetimeStart) > DateTime.Now)
+            timeDifference = DateTime.Parse(Request.DatetimeStart) - DateTime.Now;
+        else
+            timeDifference = DateTime.Now - DateTime.Parse(Request.DatetimeStart);
+
+        if(timeDifference.TotalMinutes < TimeSpan.FromMinutes(15).Minutes) {
+            SetMessageBox(
+                "Request Details",
+                type: MessageType.Success,
+                reasons: reasons.ToArray(),
+                hasSubmitButton: true,
+                SubmitMessage: "Pay Request Now and Exit"
             );
+        } else {
+            SetMessageBox(
+            "Request Details",
+                type: MessageType.Warning,
+                reasons: reasons.ToArray(),
+                hasSubmitButton: true,
+                SubmitMessage: "Convert Request to Fine and Exit"
+            );
+        }
     }
 
     private void OnClickMessageBox()
@@ -104,27 +120,70 @@
 
     private async void OnSubmitMessageBox()
     {
-        // TODO: check if the request is valid to pay (if it is not expired, etc.)
-
         if (Request == null)
         {
             SetMessageBox("Error", "Request is null. Cannot proceed with payment.");
             return;
         }
 
-        var response = await Http.PatchAsync("api/v1/requests/" + Request.Email, null );
+        if (RequestModel.Type == MessageType.Success) {
+            var response = await Http.PatchAsync("api/v1/requests/" + Request.Email, null );
 
-        if (!response.IsSuccessStatusCode)
-        {
-            SetMessageBox("Error", "Failed to pay the request. Please try again later.");
-            return;
-        }
+            if (!response.IsSuccessStatusCode)
+            {
+                SetMessageBox("Error", "Failed to pay the request. Please try again later.");
+                return;
+            }
 
-        SetMessageBox(
-            "Request Paid",
-            "Your request has been successfully paid. You can now exit the totem.",
-            MessageType.Success
+            SetMessageBox(
+                "Request Paid",
+                "Your request has been successfully paid. You can now exit the totem.",
+                MessageType.Success
             );
+        } else {
+            var response = await Http.DeleteAsync("api/v1/requests?email=" + Request.Email + "&datetime_start=" + Request.DatetimeStart);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                SetMessageBox("Error", "Failed to convert the request to a fine. Please try again later.");
+                return;
+            }
+
+            var newFine = new FineNewDTO {
+                Email = Request.Email,
+                DatetimeStart = Request.DatetimeStart,
+                DatetimeEnd = Request.DatetimeEnd
+            };
+
+            Console.WriteLine($"New Fine: email = {newFine.Email}, datetime_start = {newFine.DatetimeStart}, datetime_end = {newFine.DatetimeEnd}");
+
+            response = await Http.PostAsJsonAsync("api/v1/fines", newFine);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                SetMessageBox("Error", "Failed to convert the request to a fine. Please try again later.");
+                return;
+            }
+
+            var fine = await response.Content.ReadFromJsonAsync<FineEntityDTO>();
+
+            if (fine == null)
+            {
+                SetMessageBox("Error", "Failed to convert the request to a fine. Please try again later.");
+                return;
+            }
+
+            SetMessageBox(
+                "Request Converted to Fine",
+                "Your request has been converted to a fine. You can now exit the totem.",
+                MessageType.Success,
+                [
+                    $"Email: {fine.Email}",
+                    $"Start Date: {DateTime.Parse(fine.DatetimeStart).ToString("dd-MM-yyyy HH:mm")}",
+                    $"End Date: {DateTime.Parse(fine.DatetimeEnd).ToString("dd-MM-yyyy HH:mm")}"
+                ]
+            );
+        }
     }
 
     private void SetMessageBox(

@@ -137,7 +137,7 @@ public class AdminService(IAdminRepository repository)
         return AdminResponse.Success(
             [.. history
                 .Select(r => new HistoryDTO(
-                    r.EmailNavigation.Type,
+                    r.EmailNavigation.Email,
                     r.DatetimeStart.ToString(),
                     r.DatetimeEnd.ToString(),
                     r.Kw,

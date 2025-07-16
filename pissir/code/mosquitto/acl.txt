@@ -48,3 +48,7 @@ user admin
 topic   readwrite   LWT
 topic   write       iot/sensors/+/check
 topic   read        iot/sensors/+/status
+
+user frontend
+topic   readwrite   LWT
+topic   write       iot/mwbot/new_request

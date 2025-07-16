@@ -24,26 +24,3 @@ bin
 # FRONTEND IGNORE
 #
 node_modules
-
-#
-# IOT IGNORE
-#
-sensor_*-tcplocalhost1883/.lck
-sensor_*-tcplocalhost1883/.lck
-monitor-tcplocalhost1883/.lck
-mwbot-tcplocalhost1883/.lck
-mobile_*-tcplocalhost1883/.lck
-
-#
-# TEMP
-#
-temp
-modifiche.txt
-code/backend/backend-tcplocalhost1883/.lck
-code/mwbot/mwbot-tcplocalhost1883/.lck
-
-#
-# BACKEND IGNORE
-#
-code/backend/*
-code/backend
